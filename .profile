@@ -13,8 +13,8 @@ export PROJECT_HOME=$HOME/Code
 source /usr/local/bin/virtualenvwrapper.sh
 
 
-export HOMEBREW_GITHUB_API_TOKEN=dc456ee5196ed845df2ee952870e45bf19286c65
-
+export HOMEBREW_GITHUB_API_TOKEN=foo
+:
 export PATH=/Developer/NVIDIA/CUDA-8.0/bin:${PATH}
 export DYLD_LIBRARY_PATH=/Developer/NVIDIA/CUDA-8.0/lib\ :${DYLD_LIBRARY_PATH}
 
