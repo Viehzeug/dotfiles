@@ -1,0 +1,4 @@
+args=( ${(Q)"${(z)$(<<\EO:args
+'(--revision)-r:arg:' '(-r)--revision:arg:' '--username:arg:' '--password:arg:' '--no-auth-cache' '--non-interactive' '--trust-server-cert' '--config-dir:arg:' '--config-option:arg:'
+EO:args
+)}"} )

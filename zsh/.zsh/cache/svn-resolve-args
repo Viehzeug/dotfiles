@@ -1,0 +1,4 @@
+args=( ${(Q)"${(z)$(<<\EO:args
+'--targets:arg:' '(--recursive)-R' '(-R)--recursive' '--depth:arg:' '(--quiet)-q' '(-q)--quiet' '--accept:arg:' '--username:arg:' '--password:arg:' '--no-auth-cache' '--non-interactive' '--trust-server-cert' '--config-dir:arg:' '--config-option:arg:'
+EO:args
+)}"} )

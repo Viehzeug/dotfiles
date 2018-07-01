@@ -1,0 +1,4 @@
+args=( ${(Q)"${(z)$(<<\EO:args
+'(--revision)-r:arg:' '(-r)--revision:arg:' '(--quiet)-q' '(-q)--quiet' '--force' '--parents' '--allow-mixed-revisions' '(--message)-m:arg:' '(-m)--message:arg:' '(-F --file)-F:log message file:_files' '(-F --file)--file:log message file:_files' '(-F --file)-F:log message file:_files' '(-F --file)--file:log message file:_files' '--force-log' '--editor-cmd:arg:' '--encoding:arg:' '--with-revprop:arg:' '--username:arg:' '--password:arg:' '--no-auth-cache' '--non-interactive' '--force-interactive' '--trust-server-cert' '--trust-server-cert-failures:failures:_values -s , "certificate failures to ignore" "unknown-ca[unknown authority]" "cn-mismatch[hostname mismatch]" "expired[certificate expired]" "not-yet-valid[certificate not yet valid]" "other[all other failures]"' '--config-dir:config dir:_directories' '--config-option:arg:'
+EO:args
+)}"} )
