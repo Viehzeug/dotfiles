@@ -1,4 +1,0 @@
-args=( ${(Q)"${(z)$(<<\EO:args
-'(--revision)-r:arg:' '(-r)--revision:arg:' '(--verbose)-v' '(-v)--verbose' '(--use-merge-history)-g' '(-g)--use-merge-history' '--incremental' '--xml' '(--extensions)-x:arg:' '(-x)--extensions:arg:' '--force' '--username:arg:' '--password:arg:' '--no-auth-cache' '--non-interactive' '--trust-server-cert' '--config-dir:arg:' '--config-option:arg:'
-EO:args
-)}"} )

@@ -1,1 +1,0 @@
-_bazel_build_args='*::label:_bazel_complete_target_label'
