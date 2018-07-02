@@ -2,7 +2,7 @@ export ZSH=~/.zsh
 
 for config_file ($ZSH/lib/*.zsh) source $config_file
 
-. /usr/local/etc/profile.d/z.sh
+. ~/.z.sh
 
 # Load and run compinit
 autoload -U compinit
