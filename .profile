@@ -1,26 +1,34 @@
-
 ## pager
-export PAGER="less"
-export LESS="-R"
-
+if type less > /dev/null; then
+    export PAGER="less"
+    export LESS="-R"
+fi
+    
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_CTYPE=$LANG
 
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
+export VIRTUALENVWRAPPER_PYTHON=$(which python3)
 export WORKON_HOME=$HOME/.virtualenvs
-export PROJECT_HOME=$HOME/Code
 source /usr/local/bin/virtualenvwrapper.sh
 
+if [[ $OSTYPE == darwin* ]]; then
+    #on mac do this
+    source ~/.brew_github_key
+    export PATH=/Developer/NVIDIA/CUDA-8.0/bin:${PATH}
+    export DYLD_LIBRARY_PATH=/Developer/NVIDIA/CUDA-8.0/lib\ :${DYLD_LIBRARY_PATH}
+    . ~/torch/install/bin/torch-activate
+fi
 
-source ~/.brew_github_key
+## editor
+## if we have emacs, use emacs - else vi(m)
+if type emacs > /dev/null; then
+    export EDITOR='emacsclient -nw'
+    alias eg='emacsclient -n'
+else
+    export EDITOR='vi'
+fi
 
-export PATH=/Developer/NVIDIA/CUDA-8.0/bin:${PATH}
-export DYLD_LIBRARY_PATH=/Developer/NVIDIA/CUDA-8.0/lib\ :${DYLD_LIBRARY_PATH}
-
-export EDITOR='emacsclient -nw'
 alias e=$EDITOR
-alias eg='emacsclient -n'
 alias vi=$EDITOR
 
-. /Users/marc/torch/install/bin/torch-activate
