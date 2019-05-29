@@ -1,0 +1,5 @@
+
+** Based on
+
+- [[https://github.com/bbatsov/prelude][Prelude]]
+- [[https://github.com/purcell/emacs.d][Steve Purcell's Config]]
