@@ -8,16 +8,11 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_CTYPE=$LANG
 
-export VIRTUALENVWRAPPER_PYTHON=$(which python3)
-export WORKON_HOME=$HOME/.virtualenvs
-source /usr/local/bin/virtualenvwrapper.sh
-
 if [[ $OSTYPE == darwin* ]]; then
     #on mac do this
     source ~/.brew_github_key
     export PATH=/Developer/NVIDIA/CUDA-8.0/bin:${PATH}
     export DYLD_LIBRARY_PATH=/Developer/NVIDIA/CUDA-8.0/lib\ :${DYLD_LIBRARY_PATH}
-    . ~/torch/install/bin/torch-activate
 fi
 
 ## editor
@@ -27,8 +22,7 @@ if type emacs > /dev/null; then
     alias eg='emacsclient -n'
 else
     export EDITOR='vi'
+    alias eg='vi'
 fi
 
 alias e=$EDITOR
-alias vi=$EDITOR
-
