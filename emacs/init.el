@@ -18,11 +18,12 @@
 ;; the package manager
 (require 'package)
 (setq
- package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                    ("org" . "http://orgmode.org/elpa/")
-                    ("melpa" . "http://melpa.org/packages/")
-                    ("melpa-stable" . "http://stable.melpa.org/packages/"))
+ package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+                    ("org" . "https://orgmode.org/elpa/")
+                    ("melpa" . "https://melpa.org/packages/")
+                    ("melpa-stable" . "https://stable.melpa.org/packages/"))
  package-archive-priorities '(("melpa-stable" . 1)))
+;; package-check-signature 'nil)
 
 (package-initialize)
 
@@ -37,6 +38,9 @@
 ;;---------------------------------------------
 ;; Global Setup; mostly UI
 ;;---------------------------------------------
+
+;; set default text width
+(setq-default fill-column 80)
 
 ;; disable warnings for evil and magit
 (setq ad-redefinition-action 'accept)
@@ -107,10 +111,10 @@
 (column-number-mode t)
 (size-indication-mode t)
 
-
 ;; spaces instead of tabs
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
+
 ;; Make tab key do indent first then completion.
 (setq-default tab-always-indent 'complete)
 
@@ -121,7 +125,6 @@
 ;; highlight the current line
 (global-hl-line-mode 1)
 
-
 ;; Don't clutter startup
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
@@ -130,10 +133,10 @@
 ;; Kill the entire word instead of hitting Backspace key several
 ;; times. To do this will bind the =backward-kill-region= function to the
 ;; =C-w= key combination
-(global-set-key "\C-w" 'backward-kill-word)
+;; (global-set-key "\C-w" 'backward-kill-word)
  ;; now we reasigne the original binding to that combination to a new one
-(global-set-key "\C-x\C-k" 'kill-region)
-(global-set-key "\C-c\C-k" 'kill-region)
+;; (global-set-key "\C-x\C-k" 'kill-region)
+;; (global-set-key "\C-c\C-k" 'kill-region)
 
 ;; use ibuffer by default
 (defalias 'list-buffers 'ibuffer)
@@ -146,11 +149,6 @@
 (setq locale-coding-system   'utf-8)
 (prefer-coding-system        'utf-8)
 (set-input-method nil)
-
-;; disable auto-save files & backups
-(setq auto-save-default nil
-      auto-save-list-file-prefix nil
-      make-backup-files nil)
 
 (use-package which-key
   :defer 10
@@ -181,25 +179,25 @@
         which-key-description-replacement-alist
         '(("Prefix Command" . "prefix")
           ("\\`calc-"       . "") ; Hide "calc-" prefixes when listing M-x calc keys
-          ("\\`projectile-" . "𝓟/")
-          ("\\`org-babel-"  . "ob/"))
+          ;; ("\\`projectile-" . "𝓟/")
+          ;; ("\\`org-babel-"  . "ob/"))
 
         ;; Underlines commands to emphasize some functions:
-        which-key-highlighted-command-list
-        '("\\(rectangle-\\)\\|\\(-rectangle\\)"
-          "\\`org-"))
+        ;; which-key-highlighted-command-list
+        ;; '("\\(rectangle-\\)\\|\\(-rectangle\\)"
+        ;;   "\\`org-"))
 
-  ;; Change what string to display for a given *complete* key binding
-  ;; Eg: After "C-x", display "8 → +unicode" instead of "8 → +prefix"
-  (which-key-add-key-based-replacements
-    "C-x 8"   "unicode"
-    "C-c T"   "toggles-"
-    "C-c p s" "projectile-search"
-    "C-c p 4" "projectile-other-buffer-"
-    "C-x a"   "abbrev/expand"
-    "C-x r"   "rect/reg"
-    "C-c /"   "engine-mode-map"
-    "C-c C-v" "org-babel")
+  ;; ;; Change what string to display for a given *complete* key binding
+  ;; ;; Eg: After "C-x", display "8 → +unicode" instead of "8 → +prefix"
+  ;; (which-key-add-key-based-replacements
+  ;;   "C-x 8"   "unicode"
+  ;;   "C-c T"   "toggles-"
+  ;;   "C-c p s" "projectile-search"
+  ;;   "C-c p 4" "projectile-other-buffer-"
+  ;;   "C-x a"   "abbrev/expand"
+  ;;   "C-x r"   "rect/reg"
+  ;;   "C-c /"   "engine-mode-map"
+  ;;   "C-c C-v" "org-babel")
 
   (which-key-mode 1))
 
@@ -303,6 +301,10 @@
 (setq backup-directory-alist (list (cons ".*" backup-dir)))
 (setq auto-save-list-file-prefix autosave-dir)
 (setq auto-save-file-name-transforms `((".*" ,autosave-dir t)))
+;; disable auto-save files & backups
+(setq auto-save-default nil
+      auto-save-list-file-prefix nil
+      make-backup-files nil)
 
 
 ; fix tramp with zsh
@@ -311,25 +313,18 @@
 
 
 (add-to-list 'load-path (expand-file-name "scripts" user-emacs-directory))
-(require 'init-csv)
+;;(require 'init-csv)
 (require 'init-org)
 (require 'init-git)
 (require 'init-python)
-(require 'init-markdown)
-(require 'init-haskell)
+;;(require 'init-markdown)
+;;(require 'init-haskell)
 ;;(require 'init-web) ;; HTML, CSS, JS
 (require 'init-latex)
 ;;(require 'init-agda)
 ;;(require 'init-scala)
 (require 'init-spellchecking)
 (require 'init-cheatsheet)
-
-;;(require 'init-utf8-symbols)
-
-;;TODO:  Leger
-
-;;fancy uft-8
-(global-prettify-symbols-mode 1)
 
 ;; ;; easy keys to split window. Key based on ErgoEmacs keybinding
 ;; (global-set-key (kbd "M-3") 'delete-other-windows) ; expand current pane
@@ -382,11 +377,4 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" default)))
- '(haskell-ask-also-kill-buffers nil)
- '(haskell-interactive-popup-errors nil)
- '(haskell-process-type (quote stack-ghci))
- '(package-selected-packages
-   (quote
-    (agda2 smart-mode-line which-key web-mode use-package solarized-theme smex smartparens scss-mode sass-mode rainbow-mode powerline neotree mmm-mode markdown-mode magit less-css-mode latex-preview-pane helm haskell-mode flyspell-correct-ivy flycheck fixmee expand-region exec-path-from-shell evil ensime elpy ein discover-my-major discover dimmer csv-mode counsel-projectile color-theme-solarized cheatsheet beacon auctex-latexmk)))
- '(pdf-tools-handle-upgrades nil))
+    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" default))))
