@@ -12,16 +12,14 @@
           (python-shell-completion-native-output-timeout
            python-shell-completion-native-try-output-timeout))
       (python-shell-completion-native-get-completions
-       (get-buffer-process (current-buffer))
-       nil "_"))))
+       (get-buffer-process (current-buffer)) nil "_"))))
 
 ;; the package manager
-(require 'package)
-(setq
+(require 'package) (setq
  package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
-                    ("org" . "https://orgmode.org/elpa/")
-                    ("melpa" . "https://melpa.org/packages/")
-                    ("melpa-stable" . "https://stable.melpa.org/packages/"))
+                    ("org" . "https://orgmode.org/elpa/") ("melpa"
+                    . "https://melpa.org/packages/") ("melpa-stable"
+                    . "https://stable.melpa.org/packages/"))
  package-archive-priorities '(("melpa-stable" . 1)))
 ;; package-check-signature 'nil)
 
@@ -29,8 +27,7 @@
 
 ;; load use-package
 (when (not package-archive-contents)
-  (package-refresh-contents)
-  (package-install 'use-package))
+  (package-refresh-contents) (package-install 'use-package))
 (require 'use-package)
 ;; make sure that packages are installed
 (setq use-package-always-ensure t)
@@ -46,23 +43,20 @@
 (setq ad-redefinition-action 'accept)
 
 ;; fix shell
-(setq exec-path-from-shell-arguments '("-l"))
-(use-package exec-path-from-shell
-  :config
-  (when (memq window-system '(mac ns x))
+(setq exec-path-from-shell-arguments '("-l"));;
+(use-package
+exec-path-from-shell
+  :config (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize)))
 
 
 (use-package ivy
-  :diminish (ivy-mode . "")             ; does not display ivy in the modeline
+  :diminish (ivy-mode . "")  ;; does not display ivy in the modeline
   :config
-  (setq ivy-use-virtual-buffers t)
-  :init
-  (ivy-mode 1))
+  (setq ivy-use-virtual-buffers t) :init (ivy-mode 1))
 
 (use-package counsel
-  :bind ("M-x" . counsel-M-x)
-  )
+  :bind ("M-x" . counsel-M-x) )
 
 (use-package swiper
   :bind
@@ -85,7 +79,7 @@
 
 ;; TODO flycheck modes
 
-(use-package evil)
+;;(use-package evil)
 
 (use-package auto-complete
   :config (ac-config-default))
@@ -158,7 +152,7 @@
   ;; Replacements for how KEY is replaced when which-key displays
   ;;   KEY → FUNCTION
   ;; Eg: After "C-c", display "right → winner-redo" as "▶ → winner-redo"
-  (setq which-key-key-replacement-alist
+  (setq which-key-replacement-alist
         '(("<\\([[:alnum:]-]+\\)>" . "\\1")
           ("left"                  . "◀")
           ("right"                 . "▶")
@@ -174,31 +168,7 @@
         which-key-special-keys '("RET" "DEL" ; delete key
                                  "ESC" "BS" ; backspace key
                                  "SPC" "TAB")
-
-        ;; Replacements for how part or whole of FUNCTION is replaced:
-        which-key-description-replacement-alist
-        '(("Prefix Command" . "prefix")
-          ("\\`calc-"       . "") ; Hide "calc-" prefixes when listing M-x calc keys
-          ;; ("\\`projectile-" . "𝓟/")
-          ;; ("\\`org-babel-"  . "ob/"))
-
-        ;; Underlines commands to emphasize some functions:
-        ;; which-key-highlighted-command-list
-        ;; '("\\(rectangle-\\)\\|\\(-rectangle\\)"
-        ;;   "\\`org-"))
-
-  ;; ;; Change what string to display for a given *complete* key binding
-  ;; ;; Eg: After "C-x", display "8 → +unicode" instead of "8 → +prefix"
-  ;; (which-key-add-key-based-replacements
-  ;;   "C-x 8"   "unicode"
-  ;;   "C-c T"   "toggles-"
-  ;;   "C-c p s" "projectile-search"
-  ;;   "C-c p 4" "projectile-other-buffer-"
-  ;;   "C-x a"   "abbrev/expand"
-  ;;   "C-x r"   "rect/reg"
-  ;;   "C-c /"   "engine-mode-map"
-  ;;   "C-c C-v" "org-babel")
-
+)
   (which-key-mode 1))
 
 
