@@ -37,7 +37,7 @@
 ;;---------------------------------------------
 
 ;; set default text width
-(setq-default fill-column 80)
+(setq-default fill-column 70) ;; 70 fits nicly on half a 13'' macbook
 
 ;; disable warnings for evil and magit
 (setq ad-redefinition-action 'accept)
