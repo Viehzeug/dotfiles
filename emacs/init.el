@@ -4,16 +4,6 @@
 
 (setq gc-cons-threshold 50000000)
 
-
-(with-eval-after-load 'python
-  (defun python-shell-completion-native-try ()
-    "Return non-nil if can trigger native completion."
-    (let ((python-shell-completion-native-enable t)
-          (python-shell-completion-native-output-timeout
-           python-shell-completion-native-try-output-timeout))
-      (python-shell-completion-native-get-completions
-       (get-buffer-process (current-buffer)) nil "_"))))
-
 ;; the package manager
 (require 'package) (setq
  package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
@@ -35,6 +25,43 @@
 ;;---------------------------------------------
 ;; Global Setup; mostly UI
 ;;---------------------------------------------
+
+(defun move-text-internal (arg)
+   (cond
+    ((and mark-active transient-mark-mode)
+     (if (> (point) (mark))
+            (exchange-point-and-mark))
+     (let ((column (current-column))
+              (text (delete-and-extract-region (point) (mark))))
+       (forward-line arg)
+       (move-to-column column t)
+       (set-mark (point))
+       (insert text)
+       (exchange-point-and-mark)
+       (setq deactivate-mark nil)))
+    (t
+     (beginning-of-line)
+     (when (or (> arg 0) (not (bobp)))
+       (forward-line)
+       (when (or (< arg 0) (not (eobp)))
+            (transpose-lines arg))
+       (forward-line -1)))))
+
+(defun move-text-down (arg)
+  "Move region (transient-mark-mode active) or current line
+  arg lines down."
+   (interactive "*p")
+   (move-text-internal arg))
+
+(defun move-text-up (arg)
+   "Move region (transient-mark-mode active) or current line
+  arg lines up."
+   (interactive "*p")
+   (move-text-internal (- arg)))
+
+(global-set-key (kbd "C-S-<up>") 'move-text-up)
+(global-set-key (kbd "C-S-<down>") 'move-text-down)
+
 
 ;; set default text width
 (setq-default fill-column 70) ;; 70 fits nicly on half a 13'' macbook
@@ -148,27 +175,6 @@ exec-path-from-shell
   :defer 10
   :diminish which-key-mode
   :config
-
-  ;; Replacements for how KEY is replaced when which-key displays
-  ;;   KEY → FUNCTION
-  ;; Eg: After "C-c", display "right → winner-redo" as "▶ → winner-redo"
-  (setq which-key-replacement-alist
-        '(("<\\([[:alnum:]-]+\\)>" . "\\1")
-          ("left"                  . "◀")
-          ("right"                 . "▶")
-          ("up"                    . "▲")
-          ("down"                  . "▼")
-          ("delete"                . "DEL") ; delete key
-          ("\\`DEL\\'"             . "BS") ; backspace key
-          ("next"                  . "PgDn")
-          ("prior"                 . "PgUp"))
-
-        ;; List of "special" keys for which a KEY is displayed as just
-        ;; K but with "inverted video" face... not sure I like this.
-        which-key-special-keys '("RET" "DEL" ; delete key
-                                 "ESC" "BS" ; backspace key
-                                 "SPC" "TAB")
-)
   (which-key-mode 1))
 
 
@@ -193,8 +199,6 @@ exec-path-from-shell
   (smartparens-global-mode 't)
 ;;  (smartparens-strict-mode 't)
 )
-
-(use-package ein) ;;TODO move to python file
 
 (use-package discover-my-major)
 
@@ -347,4 +351,7 @@ exec-path-from-shell
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" default))))
+    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" default)))
+ '(package-selected-packages
+   (quote
+    (pyenv-mode which-key use-package smartparens smart-mode-line neotree magit haskell-mode flyspell-correct-ivy flycheck f expand-region exec-path-from-shell evil elpy ein discover-my-major csv-mode counsel-projectile color-theme-solarized cheatsheet beacon auctex))))
