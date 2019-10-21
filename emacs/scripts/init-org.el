@@ -17,4 +17,7 @@
        (org-restart-font-lock)
        (setq org-descriptive-links t))))
 
+
+(setq org-image-actual-width nil)
+
 (provide 'init-org)
