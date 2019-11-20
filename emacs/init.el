@@ -356,3 +356,12 @@ exec-path-from-shell
 ;;  '(package-selected-packages
 ;;    (quote
 ;;     (latex pyenv-mode which-key use-package smartparens smart-mode-line neotree magit haskell-mode flyspell-correct-ivy flycheck f expand-region exec-path-from-shell evil elpy ein discover-my-major csv-mode counsel-projectile color-theme-solarized cheatsheet beacon auctex))))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-agenda-files (quote ("~/org/todo.org")))
+ '(package-selected-packages
+   (quote
+    (auctex-latexmk which-key use-package smartparens smart-mode-line pyenv-mode neotree magit haskell-mode flyspell-correct-ivy flycheck expand-region exec-path-from-shell evil elpy ein discover-my-major csv-mode counsel-projectile color-theme-solarized cheatsheet beacon auctex))))

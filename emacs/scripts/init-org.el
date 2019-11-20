@@ -1,8 +1,7 @@
 (use-package org
   :init
   (setq org-log-done t)
-  (setq org-agenda-files (list "~/org/todo.org" 
-			       "~/org/refile-beorg.org"))
+  (setq org-agenda-files '("~/org"))
   :bind ("\C-ca" . org-agenda)
   :config (add-hook 'after-init-hook 'org-todo-list))
 
@@ -19,5 +18,11 @@
 
 
 (setq org-image-actual-width nil)
+
+(use-package org-zotxt
+  :ensure zotxt
+  :after org
+  :init (add-hook 'org-mode-hook #'org-zotxt-mode)
+)
 
 (provide 'init-org)
