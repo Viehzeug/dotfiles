@@ -4,10 +4,9 @@
   (setq org-agenda-files '("~/org"))
   :bind ("\C-ca" . org-agenda)
   :config
-  ((add-hook 'after-init-hook 'org-todo-list)
-   ;; Try to minimize org sync conflicts (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
-   (add-hook 'auto-save-hook 'org-save-all-org-buffers) ;; enable autosaves
-   )
+  (add-hook 'after-init-hook 'org-todo-list)
+  ;; Try to minimize org sync conflicts (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
+  (add-hook 'auto-save-hook 'org-save-all-org-buffers) ;; enable autosaves
   )
 
 (defun org-toggle-link-display ()
