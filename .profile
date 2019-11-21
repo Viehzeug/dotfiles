@@ -8,11 +8,16 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_CTYPE=$LANG
 
+
 if [[ $OSTYPE == darwin* ]]; then
     #on mac do this
     source ~/.brew_github_key
     export PATH=/Developer/NVIDIA/CUDA-8.0/bin:${PATH}
     export DYLD_LIBRARY_PATH=/Developer/NVIDIA/CUDA-8.0/lib\ :${DYLD_LIBRARY_PATH}
+elif [[ $OSTYPE == linux-gnu ]]; then
+    function open () {
+        xdg-open "$*" >/dev/null 2>/dev/null & 
+    }
 fi
 
 ## editor
