@@ -4,14 +4,19 @@
 
 (setq gc-cons-threshold 50000000)
 
+;; disable customize (from https://github.com/angrybacon/dotemacs/blob/master/dotemacs.org#load-customel)
+(setq-default custom-file (expand-file-name ".custom.el" user-emacs-directory))
+;(when (file-exists-p custom-file)
+;  (load custom-file))
+
 ;; the package manager
-(require 'package) (setq
- package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
-                    ("org" . "https://orgmode.org/elpa/") ("melpa"
-                    . "https://melpa.org/packages/") ("melpa-stable"
-                    . "https://stable.melpa.org/packages/"))
- package-archive-priorities '(("melpa-stable" . 1)))
-;; package-check-signature 'nil)
+(require 'package)
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("melpa" . "https://melpa.org/packages/")
+                         ("melpa-stable" . "https://stable.melpa.org/packages/"))
+      package-archive-priorities '(("melpa-stable" . 1)))
+;; package-check-signature 'nil) ;; neccesary if cert is broken again
 
 (package-initialize)
 
@@ -163,6 +168,9 @@ exec-path-from-shell
 ;; use ibuffer by default
 (defalias 'list-buffers 'ibuffer)
 
+
+
+
  ;; make sure that UTF-8 is used everywhere.
 (set-terminal-coding-system  'utf-8)
 (set-keyboard-coding-system  'utf-8)
@@ -259,6 +267,13 @@ exec-path-from-shell
   ("C-c <left>" . windmove-left)
   ("C-c <right>" . windmove-right))
 
+;; make C-a move to the beginning of the line on first press; on further presses go to beginning of code
+;; same for C-e and end
+(use-package mwim
+  :bind
+  ("C-a" . mwim-beginning)
+  ("C-e" . mwim-end))
+
 ;;TODO:  Leger
 
 ;;fancy uft-8
@@ -310,58 +325,8 @@ exec-path-from-shell
 ;;better automatic window split
 ;;from https://stackoverflow.com/questions/2081577/setting-emacs-to-split-buffers-side-by-side
 
-;; (defun display-new-buffer (buffer force-other-window)
-;;   "If BUFFER is visible, select it.
-;; If it's not visible and there's only one window, split the
-;; current window and select BUFFER in the new window. If the
-;; current window (before the split) is more than 100 columns wide,
-;; split horizontally(left/right), else split vertically(up/down).
-;; If the current buffer contains more than one window, select
-;; BUFFER in the least recently used window.
-;; This function returns the window which holds BUFFER.
-;; FORCE-OTHER-WINDOW is ignored."
-;;   (or (get-buffer-window buffer)
-;;     (if (one-window-p)
-;;         (let ((new-win
-;;                (if (> (window-width) 100)
-;;                    (split-window-horizontally)
-;;                  (split-window-vertically))))
-;;           (set-window-buffer new-win buffer)
-;;           new-win)
-;;       (let ((new-win (get-lru-window)))
-;;         (set-window-buffer new-win buffer)
-;;         new-win))))
-;; ;; use display-buffer-alist instead of display-buffer-function if the following line won't work
-;; (setq display-buffer-function 'display-new-buffer)
-
 (set-face-attribute 'default nil :height 150 :family "Ubuntu Mono" :foreground "#657b83")
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 
 ;; Disable debugging
 (setq debug-on-error nil)
 (setq debug-on-quit nil)
-;; (custom-set-variables
-;;  ;; custom-set-variables was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(custom-safe-themes
-;;    (quote
-;;     ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" default)))
-;;  '(package-selected-packages
-;;    (quote
-;;     (latex pyenv-mode which-key use-package smartparens smart-mode-line neotree magit haskell-mode flyspell-correct-ivy flycheck f expand-region exec-path-from-shell evil elpy ein discover-my-major csv-mode counsel-projectile color-theme-solarized cheatsheet beacon auctex))))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-agenda-files (quote ("~/org/todo.org")))
- '(package-selected-packages
-   (quote
-    (auctex-latexmk which-key use-package smartparens smart-mode-line pyenv-mode neotree magit haskell-mode flyspell-correct-ivy flycheck expand-region exec-path-from-shell evil elpy ein discover-my-major csv-mode counsel-projectile color-theme-solarized cheatsheet beacon auctex))))
