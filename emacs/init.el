@@ -84,13 +84,22 @@ exec-path-from-shell
   (setq ivy-use-virtual-buffers t) :init (ivy-mode 1))
 
 (use-package counsel
-  :bind ("M-x" . counsel-M-x) )
+  :after ivy)
 
 (use-package swiper
+  :after counsel
   :bind
+  ("M-x" . counsel-M-x)
   ("\C-s" . swiper)
   ("C-c C-r" . ivy-resume)
+  ("C-c p" . counsel-git)
+  ("C-c g" . counsel-rg)
   ("C-x C-f" . counsel-find-file))
+
+(use-package ripgrep
+  :bind
+  ("C-c C-g" . ripgrep-regexp))
+(use-package ag)
 
 (use-package neotree
   :bind
@@ -113,7 +122,7 @@ exec-path-from-shell
   :config (ac-config-default))
 
 ;; File search
-(use-package find-file-in-project)
+;;(use-package find-file-in-project)
 
 ;; Theme
 (use-package color-theme-solarized)
@@ -236,15 +245,16 @@ exec-path-from-shell
   )
 
 
-(use-package projectile
-  :defer 1
-  :config
-  (projectile-global-mode +1))
 
-(use-package counsel-projectile
-  :defer 1
-  :config
-  (counsel-projectile-mode))
+;; (use-package projectile
+;;   :defer 1
+;;   :config
+;;   (projectile-global-mode +1))
+
+;; (use-package counsel-projectile
+;;   :defer 1
+;;   :config
+;;   (counsel-projectile-mode))
 
 (use-package expand-region
   :bind
@@ -361,7 +371,7 @@ exec-path-from-shell
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-agenda-files (quote ("~/org/todo.org")))
+ '(org-agenda-files (quote ("~/org/todo.org")) t)
  '(package-selected-packages
    (quote
     (auctex-latexmk which-key use-package smartparens smart-mode-line pyenv-mode neotree magit haskell-mode flyspell-correct-ivy flycheck expand-region exec-path-from-shell evil elpy ein discover-my-major csv-mode counsel-projectile color-theme-solarized cheatsheet beacon auctex))))
