@@ -1,13 +1,5 @@
-;; only debug during init; disabled at end.
-(setq debug-on-error t)
-(setq debug-on-quit t)
+;; Load ~use-package~
 
-(setq gc-cons-threshold 50000000)
-
-;; disable customize (from https://github.com/angrybacon/dotemacs/blob/master/dotemacs.org#load-customel)
-(setq-default custom-file (expand-file-name ".custom.el" user-emacs-directory))
-;(when (file-exists-p custom-file)
-;  (load custom-file))
 
 ;; the package manager
 (require 'package)
@@ -27,112 +19,96 @@
 ;; make sure that packages are installed
 (setq use-package-always-ensure t)
 
-
-;;---------------------------------------------
-;; Global Setup; mostly UI
-;;---------------------------------------------
-
-(defun move-text-internal (arg)
-   (cond
-    ((and mark-active transient-mark-mode)
-     (if (> (point) (mark))
-            (exchange-point-and-mark))
-     (let ((column (current-column))
-              (text (delete-and-extract-region (point) (mark))))
-       (forward-line arg)
-       (move-to-column column t)
-       (set-mark (point))
-       (insert text)
-       (exchange-point-and-mark)
-       (setq deactivate-mark nil)))
-    (t
-     (beginning-of-line)
-     (when (or (> arg 0) (not (bobp)))
-       (forward-line)
-       (when (or (< arg 0) (not (eobp)))
-            (transpose-lines arg))
-       (forward-line -1)))))
-
-(defun move-text-down (arg)
-  "Move region (transient-mark-mode active) or current line
-  arg lines down."
-   (interactive "*p")
-   (move-text-internal arg))
-
-(defun move-text-up (arg)
-   "Move region (transient-mark-mode active) or current line
-  arg lines up."
-   (interactive "*p")
-   (move-text-internal (- arg)))
-
-(global-set-key (kbd "C-S-<up>") 'move-text-up)
-(global-set-key (kbd "C-S-<down>") 'move-text-down)
+;; Garbage Collector
+;; From https://github.com/MatthewZMD/.emacs.d:
+;; - Defer garbage collection further back in the startup process,
+;;   according to hlissner.
+;;   - The GC eats up quite a bit of time, easily doubling startup
+;;     time. The trick is to turn up the memory threshold as early as
+;;     possible.
+;; [[https://www.reddit.com/r/emacs/comments/eewwyh/officially_introducing_memacs/][However]] (user /u/eli-zaretskii):
+;; - The threshold should be determined by each user, by starting from
+;;   the default and doubling the value until they feel Emacs is fast
+;;   enough. There's no single value that will satisfy everyone.
 
 
-;; set default text width
-(setq-default fill-column 70) ;; 70 fits nicly on half a 13'' macbook
+(setq gc-cons-threshold 100000000)
+
+;; Fixes
+;; Fix small things that cause warnings and errors. Especially on Mac OS.
+
 
 ;; disable warnings for evil and magit
 (setq ad-redefinition-action 'accept)
 
+
+
+;; Ensure that on OS X the correct paths from the shell config are loaded.
+
+
 ;; fix shell
-(setq exec-path-from-shell-arguments '("-l"));;
-(use-package
-exec-path-from-shell
-  :config (when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize)))
+;;(setq exec-path-from-shell-arguments '("-l"))
+(use-package exec-path-from-shell
+ :config (when (memq window-system '(mac ns x))
+ (exec-path-from-shell-initialize)))
+
+;; fix tramp with zsh
+(eval-after-load 'tramp '(setenv "SHELL" "/bin/bash"))
+
+;; Tools
+;; Load tools that are required for other parts of the config.
+
+;; Package used for hiding modeline info. This is what is called by
+;; ~:diminish~.
+
+(use-package diminish)
 
 
-(use-package ivy
-  :diminish (ivy-mode . "")  ;; does not display ivy in the modeline
-  :config
-  (setq ivy-use-virtual-buffers t) :init (ivy-mode 1))
 
-(use-package counsel
-  :after ivy)
+;; String, file and list libraries.
 
-(use-package swiper
-  :after counsel
-  :bind
-  ("M-x" . counsel-M-x)
-  ("\C-s" . swiper)
-  ("C-c C-r" . ivy-resume)
-  ("C-c p" . counsel-git)
-  ("C-c g" . counsel-rg)
-  ("C-x C-f" . counsel-find-file))
+(use-package s)
+(use-package f)
+(use-package dash)
 
-(use-package ripgrep
-  :bind
-  ("C-c C-g" . ripgrep-regexp))
-(use-package ag)
+ (use-package hydra)
 
-(use-package neotree
-  :bind
-  ("C-§" . neotree-toggle)
-  ("<f10>" . neotree-toggle))
 
-(use-package flycheck
-  :defer 1
-  :init (global-flycheck-mode))
 
-;; (eval-after-load 'flycheck
-;;   '(progn
-;;      (require 'flycheck-hdevtools)))
+;; Nice icons. *You need to run* ~M-x all-the-icons-install-fonts~. The
+;; script checks if the font is installed and else runs the command.
 
-;; TODO flycheck modes
 
-;;(use-package evil)
+(use-package all-the-icons
+    :init
+    (unless (member "all-the-icons" (font-family-list))
+    (all-the-icons-install-fonts t))) ;; see https://github.com/domtronn/all-the-icons.el/issues/120
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
 
-(use-package auto-complete
-  :config (ac-config-default))
+;; Personal Setup
 
-;; File search
-;;(use-package find-file-in-project)
+(setq user-full-name "Marc Fischer")
+(setq user-mail-address "mail@marcfischer.at")
+
+;; Backup
+
+;; disable auto-save files & backups
+(setq auto-save-default nil
+      auto-save-list-file-prefix nil
+      make-backup-files nil)
+;; but in case soemthing goes wrong still place them in the .emacs.d
+(defvar backup-dir (expand-file-name "~/.emacs.d/emacs_backup/"))
+(defvar autosave-dir (expand-file-name "~/.emacs.d/autosave/"))
+
+;; Theme
 
 ;; Theme
 (use-package color-theme-solarized)
 (setq frame-background-mode 'light)
 ;; (setq solarized-termcolors 256)
+
+(set-face-attribute 'default nil :height 150 :family "Ubuntu Mono" :foreground "#657b83")
 
 (if (daemonp)
 (add-hook 'after-make-frame-functions
@@ -147,6 +123,113 @@ exec-path-from-shell
 (column-number-mode t)
 (size-indication-mode t)
 
+;; show the matching parenthesis when the cursor is above one of them.
+(setq show-paren-delay 0)
+(setq show-paren-style 'mixed)
+(show-paren-mode t)
+(use-package smartparens
+ :diminish
+ :config
+ (progn
+   (require 'smartparens-config)
+   (smartparens-global-mode 1)
+   (show-paren-mode t)))
+
+;; highlight the current line
+(global-hl-line-mode t)
+
+;; Don't clutter startup
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-message t)
+
+;; disable toolbars
+(menu-bar-mode -1)
+(toggle-scroll-bar -1)
+(tool-bar-mode -1)
+
+; display a small wave after the cursor when jumping around
+(use-package beacon
+   :config (beacon-mode +1))
+
+;; disable bell sound; but flash visual bell
+(setq ring-bell-function 'ignore
+       visible-bell 1)
+
+;; nice scrolling
+(setq scroll-margin 0
+      scroll-conservatively 100000
+      scroll-preserve-screen-position 1)
+
+;; enable y/n answers
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;; modeline
+
+
+(use-package doom-modeline
+      :ensure t
+      :hook (after-init . doom-modeline-mode)
+      :custom
+      (inhibit-compacting-font-caches t)
+      (doom-modeline-minor-modes t)
+      (doom-modeline-icon t)
+      (doom-modeline-major-mode-color-icon t)
+      (doom-modeline-height 15))
+
+;; Text width (Fill-mode)
+;; ~M-q~ (~fill-paragraph~) justifies paragraphs and automatically breaks
+;; them. Here we set the set standard text width.
+
+(setq-default fill-column 70) ;; 70 fits nicly on half a 13'' macbook
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
+
+;; Counsel, Swiper and Ivy
+;; Setup the ivy auto-complete package along with swiper
+;; (ivy-text-search) and counsel (ivy-M-x).
+
+(use-package ivy
+  :diminish 
+  :config
+  (setq ivy-use-virtual-buffers t) :init (ivy-mode 1))
+
+(use-package counsel
+  :after ivy)
+
+(use-package swiper
+  :after counsel
+  :bind
+  ("M-x" . counsel-M-x)
+  ("\C-s" . swiper)
+  ("M-s" . swiper-all)
+  ("C-c C-r" . ivy-resume)
+  ("C-c p" . counsel-git)
+  ("C-c g" . counsel-rg)
+  ("C-x C-f" . counsel-find-file)
+  (("M-y" . counsel-yank-pop)
+  :map ivy-minibuffer-map
+  ("M-y" . ivy-next-line)) ;; multiple pressed cycles through choices; taken from http://pragmaticemacs.com/emacs/counsel-yank-pop-with-a-tweak/
+)
+
+;; Search
+
+(use-package ripgrep
+  :bind
+  ("C-c C-g" . ripgrep-regexp))
+(use-package ag) ;; currently not used but frequently experimented with
+
+;; Buffers
+
+
+;; use ibuffer by default
+(defalias 'list-buffers 'ibuffer)
+
+;; Indentation
+
+;; Always stay indented: Automatically have blocks reindented after every change.
+(use-package aggressive-indent
+  :config (global-aggressive-indent-mode t))
+
 ;; spaces instead of tabs
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
@@ -154,49 +237,7 @@ exec-path-from-shell
 ;; Make tab key do indent first then completion.
 (setq-default tab-always-indent 'complete)
 
-;; show the matching parenthesis when the cursor is above one of them.
-(setq show-paren-delay 0)
-(show-paren-mode t)
-
-;; highlight the current line
-(global-hl-line-mode 1)
-
-;; Don't clutter startup
-(setq inhibit-splash-screen t)
-(setq inhibit-startup-message t)
-
-;; backward-kill-word as alternative to Backspace:
-;; Kill the entire word instead of hitting Backspace key several
-;; times. To do this will bind the =backward-kill-region= function to the
-;; =C-w= key combination
-;; (global-set-key "\C-w" 'backward-kill-word)
- ;; now we reasigne the original binding to that combination to a new one
-;; (global-set-key "\C-x\C-k" 'kill-region)
-;; (global-set-key "\C-c\C-k" 'kill-region)
-
-;; use ibuffer by default
-(defalias 'list-buffers 'ibuffer)
-
-
-
-
- ;; make sure that UTF-8 is used everywhere.
-(set-terminal-coding-system  'utf-8)
-(set-keyboard-coding-system  'utf-8)
-(set-language-environment    'utf-8)
-(set-selection-coding-system 'utf-8)
-(setq locale-coding-system   'utf-8)
-(prefer-coding-system        'utf-8)
-(set-input-method nil)
-
-(use-package which-key
-  :defer 10
-  :diminish which-key-mode
-  :config
-  (which-key-mode 1))
-
-
-;; UI setup
+;; Parenthesis and Whitespace
 
 (use-package whitespace
   :init
@@ -208,67 +249,314 @@ exec-path-from-shell
   :bind
   ("<f11>" . whitespace-mode))
 
-(use-package smartparens
-  :defer 2
-  :diminish smartparens-mode
+;; comments
+
+(global-set-key (kbd "M-;") 'comment-region)
+(global-set-key (kbd "C-M-;") 'uncomment-region)
+
+;; UTF-8
+
+
+;; make sure that UTF-8 is used everywhere.
+(set-terminal-coding-system  'utf-8)
+(set-keyboard-coding-system  'utf-8)
+(set-language-environment    'utf-8)
+(set-selection-coding-system 'utf-8)
+(setq locale-coding-system   'utf-8)
+(prefer-coding-system        'utf-8)
+(set-input-method nil)
+
+;;fancy uft-8
+(global-prettify-symbols-mode 1)
+
+;; Help & Documentation
+;; Display possible keys after a partial commands is entered.
+
+(use-package which-key
+  :diminish
+  :config (which-key-mode)
+          (setq which-key-idle-delay 0.05))
+
+;; TODO Cheatsheet
+
+(use-package cheatsheet
+  :bind ("C-<f1>" . cheatsheet-show)
   :config
-  (require 'smartparens-config)
-  (setq-default sp-autoinsert-pair nil)
-  (smartparens-global-mode 't)
-;;  (smartparens-strict-mode 't)
+  (cheatsheet-add :group 'Common
+                  :key "C-x C-c"
+                  :description "leave Emacs.")
+  (cheatsheet-add :group 'Common
+                  :key "C-_"
+                  :description "undo")
+  
+  (cheatsheet-add :group 'Move
+                  :key "C-f"
+                  :description "forward char")
+  (cheatsheet-add :group 'Move
+                  :key "C-b"
+                  :description "backward char")
+  (cheatsheet-add :group 'Move
+                  :key "M-f"
+                  :description "forward word")
+  (cheatsheet-add :group 'Move
+                  :key "M-b"
+                  :description "backward word")
+  (cheatsheet-add :group 'Move
+                  :key "C-n"
+                  :description "forward line")
+  (cheatsheet-add :group 'Move
+                  :key "C-p"
+                  :description "backward line")
+  (cheatsheet-add :group 'Move
+                  :key "M-e"
+                  :description "forward sentence")
+  (cheatsheet-add :group 'Move
+                  :key "M-a"
+                  :description "backward sentence")
+  (cheatsheet-add :group 'Move
+                  :key "C-M-f"
+                  :description "forward expression")
+  (cheatsheet-add :group 'Move
+                  :key "C-M-b"
+                  :description "backward expression")
+  (cheatsheet-add :group 'Move
+                  :key "M-}"
+                  :description "forward paragraph")
+  (cheatsheet-add :group 'Move
+                  :key "M-{"
+                  :description "backward paragraph")
+
+  (cheatsheet-add :group 'Delete
+                  :key "C-d"
+                  :description "forward char")
+  (cheatsheet-add :group 'Delete
+                  :key "DEL"
+                  :description "backward char")
+  (cheatsheet-add :group 'Delete
+                  :key "M-d"
+                  :description "forward word")
+  (cheatsheet-add :group 'Delete
+                  :key "M-DEL"
+                  :description "backward word (same as C-w)")
+  (cheatsheet-add :group 'Delete
+                  :key "C-k"
+                  :description "forward line")  
+  
+  (cheatsheet-add :group 'Terminal
+                  :key "C-w"
+                  :description "cut to previous white space")
+  (cheatsheet-add :group 'Terminal
+                  :key "C-y"
+                  :description "paste last cut text")
+  (cheatsheet-add :group 'Terminal
+                  :key "M-y"
+                  :description "loop through last cut text")
+  (cheatsheet-add :group 'Terminal
+                  :key "C-r"
+                  :description "search as you type (twice to search)")
+  (cheatsheet-add :group 'Terminal
+                  :key "C-j"
+                  :description "end search at current history entry")
+  
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b s"
+                  :description "list sessions")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b $"
+                  :description "name session")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b c"
+                  :description "create window (tab)")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b w"
+                  :description "list windows (tabs)")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b n"
+                  :description "next window (tab)")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b p"
+                  :description "previous window (tab)")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b f"
+                  :description "find window (tab)")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b ,"
+                  :description "name window (tab)")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b &"
+                  :description "kill window (tab)")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b %"
+                  :description "vertical split")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b \""
+                  :description "horizontal split")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b x"
+                  :description "kill pane")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b <SPC>"
+                  :description "toggle between layouts")
+  (cheatsheet-add :group 'Tmux
+                  :key "C-b d"
+                  :description "detach")  
+  )
+
+;; Spellchecking
+
+;; Taken/inspired by https://github.com/kaushalmodi/.emacs.d/blob/master/setup-files/setup-spell.el
+
+(use-package ispell
+  :if (not (bound-and-true-p disable-pkg-ispell))
+  :ensure f
+  :config
+  (setq ispell-program-name "aspell")
+  (setq ispell-extra-args   '("--sug-mode=ultra"
+                              "--lang=en_US"))
+
+;; Save a new word to personal dictionary without asking
+(setq ispell-silently-savep t))
+  
+(use-package flyspell
+  :ensure f
+  :diminish
+  :after ispell
+  :init
+  (progn
+    ;; Below variables need to be set before `flyspell' is loaded.
+    (setq flyspell-use-meta-tab nil)
+    ;; Binding for `flyspell-auto-correct-previous-word'.
+    (setq flyspell-auto-correct-binding (kbd "<S-f12>")))
+  :hook ((prog-mode . flyspell-prog-mode)
+           (org-mode . flyspell-mode)
+           (text-mode . flyspell-mode))
 )
 
-(use-package discover-my-major)
+(use-package flyspell-correct
+  :after flyspell)
 
-(menu-bar-mode +1)
-(toggle-scroll-bar -1)
-(tool-bar-mode -1)
-(use-package beacon
-  :config (beacon-mode +1))
+(defun fd-switch-dictionary()
+  (interactive)
+  (let* ((dic ispell-current-dictionary)
+         (change (if (string= dic "deutsch8") "english" "deutsch8")))
+    (ispell-change-dictionary change)
+    (message "Dictionary switched from %s to %s" dic change)
+    ))
 
-;; disable bell sound
-(setq ring-bell-function 'ignore)
+;; https://github.com/d12frosted/flyspell-correct
+(use-package flyspell-correct-ivy
+  :after flyspell-correct
+  :bind
+  (("<f12>" . flyspell-correct-at-point)
+   ("<f8>" .   'fd-switch-dictionary)))
 
-;; nice scrolling
-(setq scroll-margin 0
-      scroll-conservatively 100000
-      scroll-preserve-screen-position 1)
+;; Writegood
 
-;; enable y/n answers
-(fset 'yes-or-no-p 'y-or-n-p)
+(use-package writegood-mode
+  :hook (text-mode org-mode)
+  :diminish
+  :config
+  (--map (push it writegood-weasel-words) ;; some words form https://github.com/alhassy/emacs.d#cosmetics
+         '("some" "simple" "simply" "easy" "often" "easily" "probably"
+           "clearly"               ;; Is the premise undeniably true?
+           "experience shows"      ;; Whose? What kind? How does it do so?
+           "may have"              ;; It may also have not!
+           "it turns out that")))  ;; How does it turn out so?
+
+;; Subword
+;; In CamelCase treat all words as words.
+
+
+(global-subword-mode 1)
+(diminish  'subword-mode)
+
+;; Syntax Checking
+
+(use-package flycheck
+  :diminish
+  :init (global-flycheck-mode)
+  :custom (flycheck-display-errors-delay .3))
+
+;; Remove Buffers
+
+(global-set-key [f5] '(lambda () (interactive) (revert-buffer nil t nil)))
+
+;; Server
 
 ;; Start server mode
 (server-start)
 
-;; make sure we find binaries; mainly sbt for scala
-(when (memq window-system '(mac ns x))
- (add-to-list 'exec-path "/usr/local/bin"))
+;; Files
 
+(use-package dired
+  :ensure nil
+  :custom
+  ;; Auto revert
+  (auto-revert-use-notify nil)
+  (auto-revert-interval 3))
 
-(use-package smart-mode-line
-  :init
-  (setq sml/theme 'respectful)
-  (setq sml/no-confirm-load-theme t)
-  (sml/setup)
-  )
+;; Auto complete
 
+(use-package company
+  :diminish
+  :config
+  (global-company-mode 1)
+  (setq ;; Only 2 letters required for completion to activate.
+        company-minimum-prefix-length 2
 
+        ;; Search other buffers for compleition candidates
+        company-dabbrev-other-buffers t
+        company-dabbrev-code-other-buffers t
 
-;; (use-package projectile
-;;   :defer 1
-;;   :config
-;;   (projectile-global-mode +1))
+        ;; Allow (lengthy) numbers to be eligible for completion.
+        company-complete-number t
 
-;; (use-package counsel-projectile
-;;   :defer 1
-;;   :config
-;;   (counsel-projectile-mode))
+        ;; M-⟪num⟫ to select an option according to its number.
+        company-show-numbers t
+
+        ;; Edge of the completion list cycles around.
+        company-selection-wrap-around t
+
+        ;; Do not downcase completions by default.
+        company-dabbrev-downcase nil
+
+        ;; Even if I write something with the ‘wrong’ case,
+        ;; provide the ‘correct’ casing.
+        company-dabbrev-ignore-case t
+
+        ;; Immediately activate completion.
+        company-idle-delay 0))
+
+;; Projectile
+;; Currently unused.
+
+  ;; (use-package projectile
+  ;;   :config
+  ;;   (projectile-global-mode +1))
+
+  ;; (use-package counsel-projectile
+  ;;   :config
+  ;;   (counsel-projectile-mode))
+
+;; Block movement of regions
+;; Move code regions up and down with ~C-S-<up>~ and ~C-S-<down>~ (similar to Eclipse).
+
+(use-package move-text
+ ;; :init (move-text-default-bindings)
+ :bind
+ (("C-S-<up>" . move-text-up)
+  ("C-S-<down>" . move-text-down))
+)
+
+;; Expand Region
 
 (use-package expand-region
   :bind
   ("C-@" . er/expand-region)
   ("C-=" . er/expand-region)
-  )
+)
+
+;; Movement
 
 (use-package windmove
   :bind
@@ -277,6 +565,57 @@ exec-path-from-shell
   ("C-c <left>" . windmove-left)
   ("C-c <right>" . windmove-right))
 
+(use-package ace-window
+  :init
+  (progn
+    (global-set-key (kbd "M-o") 'ace-window)
+    (global-set-key (kbd "<f9>") 'ace-window))
+  :config
+    (set-face-attribute
+     'aw-leading-char-face nil
+     :foreground "deep sky blue"
+     :weight 'bold
+     :height 3.0)
+    (set-face-attribute
+     'aw-mode-line-face nil
+     :inherit 'mode-line-buffer-id
+     :foreground "lawn green")
+    (setq aw-keys '(?a ?s ?d ?f ?j ?k ?l)
+          aw-dispatch-always t
+          aw-dispatch-alist
+          '((?x aw-delete-window "Ace - Delete Window")
+            (?c aw-swap-window "Ace - Swap Window")
+            (?n aw-flip-window)
+            (?v aw-split-window-vert "Ace - Split Vert Window")
+            (?h aw-split-window-horz "Ace - Split Horz Window")
+            (?m delete-other-windows "Ace - Maximize Window")
+            (?g delete-other-windows)
+            (?b balance-windows)
+            (?u (lambda ()
+                   (progn
+                        (winner-undo)
+			(setq this-command 'winner-undo))))
+            (?r winner-redo)))
+
+    (defhydra hydra-window-size (:color red)
+         "Windows size"
+         ("h" shrink-window-horizontally "shrink horizontal")
+         ("j" shrink-window "shrink vertical")
+         ("k" enlarge-window "enlarge vertical")
+         ("l" enlarge-window-horizontally "enlarge horizontal"))
+    (defhydra hydra-window-frame (:color red)
+         "Frame"
+         ("f" make-frame "new frame")
+         ("x" delete-frame "delete frame"))
+    (defhydra hydra-window-scroll (:color red)
+         "Scroll other window"
+         ("n" joe-scroll-other-window "scroll")
+         ("p" joe-scroll-other-window-down "scroll down"))
+       (add-to-list 'aw-dispatch-alist '(?w hydra-window-size/body) t)
+       (add-to-list 'aw-dispatch-alist '(?o hydra-window-scroll/body) t)
+       (add-to-list 'aw-dispatch-alist '(?\; hydra-window-frame/body) t)
+     (ace-window-display-mode t))
+
 ;; make C-a move to the beginning of the line on first press; on further presses go to beginning of code
 ;; same for C-e and end
 (use-package mwim
@@ -284,58 +623,251 @@ exec-path-from-shell
   ("C-a" . mwim-beginning)
   ("C-e" . mwim-end))
 
-;;TODO:  Leger
+;; Unbind unneeded keys
+(global-set-key (kbd "C-z") nil)
+(use-package avy
+  :bind
+  (("C-z c" . avy-goto-char-timer)
+   ("C-z l" . avy-goto-line))
+  :custom
+    (avy-timeout-seconds 0.3)
+    (avy-style 'pre)
+  :custom-face
+    (avy-lead-face ((t (:background "#51afef" :foreground "#870000" :weight bold)))));
 
-;;fancy uft-8
-(global-prettify-symbols-mode 1)
-;;(setq prettify-symbols-unprettify-at-point t)
-;;  (add-hook 'prog-mode-hook
-;;            (lambda ()
-;;              (push '("\lambda" . ?λ) prettify-symbols-alist)))
+;; Undo
+;; Copied from https://github.com/alhassy/emacs.d
 
-;; TODO fixme mode
+;; Allow tree-semantics for undo operations.
+(use-package undo-tree
+  :diminish                       ;; Don't show an icon in the modeline
+  :config
+    ;; Always have it on
+    (global-undo-tree-mode)
 
-; TODO maybe fully disable
-(defvar backup-dir (expand-file-name "~/.emacs.d/emacs_backup/"))
-(defvar autosave-dir (expand-file-name "~/.emacs.d/autosave/"))
-(setq backup-directory-alist (list (cons ".*" backup-dir)))
-(setq auto-save-list-file-prefix autosave-dir)
-(setq auto-save-file-name-transforms `((".*" ,autosave-dir t)))
-;; disable auto-save files & backups
-(setq auto-save-default nil
-      auto-save-list-file-prefix nil
-      make-backup-files nil)
+    ;; Each node in the undo tree should have a timestamp.
+    (setq undo-tree-visualizer-timestamps t)
+
+    ;; Show a diff window displaying changes between undo nodes.
+    (setq undo-tree-visualizer-diff t))
+
+;; Execute (undo-tree-visualize) then navigate along the tree to witness
+;; changes being made to your file live!
+
+;; Ledger
+
+;; ledger mode
+(use-package ledger-mode)
+
+;; org
 
 
-; fix tramp with zsh
- (eval-after-load 'tramp '(setenv "SHELL" "/bin/bash"))
+(use-package org
+  :init
+  (setq org-log-done t
+        org-agenda-files '("~/org")
+	org-catch-invisible-edits 'show
+	org-confirm-babel-evaluate nil ;; run without confirmation
+	org-src-preserve-indentation t ;; preserve indentation at export
+	org-highlight-latex-and-related '(latex))
+
+  :bind ("\C-ca" . org-agenda)
+  :config
+  (add-hook 'after-init-hook 'org-todo-list)
+  ;; Try to minimize org sync conflicts by autosaving (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
+  (add-hook 'auto-save-hook 'org-save-all-org-buffers) ;; enable autosaves
+  )
+
+(defun org-toggle-link-display ()
+  "Toggle the literal or descriptive display of links."
+  (interactive)
+  (if org-descriptive-links
+      (progn (org-remove-from-invisibility-spec '(org-link))
+         (org-restart-font-lock)
+         (setq org-descriptive-links nil))
+    (progn (add-to-invisibility-spec '(org-link))
+       (org-restart-font-lock)
+       (setq org-descriptive-links t))))
+
+(setq org-image-actual-width nil)
+
+(use-package org-super-agenda
+  :config
+  (org-super-agenda-mode))
+
+(use-package org-zotxt
+  :ensure zotxt
+  :diminish
+  :after org
+  :init (add-hook 'org-mode-hook #'org-zotxt-mode)
+)
+
+(use-package org-recur
+  :hook ((org-mode . org-recur-mode)
+         (org-agenda-mode . org-recur-agenda-mode))
+  :demand t
+  :config
+  (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
+
+  ;; Rebind the 'd' key in org-agenda (default: `org-agenda-day-view').
+  (define-key org-recur-agenda-mode-map (kbd "d") 'org-recur-finish)
+  (define-key org-recur-agenda-mode-map (kbd "C-c d") 'org-recur-finish)
+
+  (setq org-recur-finish-done t
+        org-recur-finish-archive t))
+
+;; git
+
+(use-package magit)
+
+;; python
+
+(use-package f) ;; tools used in the following function
+(use-package pyvenv)
+
+(defvar conda-home "~/miniconda3" "Home dir used for python/conda.")
+(defvar conda-home-envs (concat (file-name-as-directory conda-home) "envs") "Dir which includes defined virtualenvs.")
+
+(defun set-conda-env (path)
+  "Set the current venv to the conda enve of the given PATH."
+  (setenv "WORKON_HOME" path)
+  (pyvenv-workon ".")
+  (message (concat "Setting virtualenv to " path))
+  )
+
+;; base on http://rakan.me/emacs/python-dev-with-emacs-and-pyenv/
+(defun pyvenv-python-version-file ()
+  "Automatically activates pyvenv if .python-version file exists."
+  (interactive)
+  (let ((python-version-directory (locate-dominating-file (buffer-file-name) ".python-version")))
+    (if python-version-directory
+        (let* ((pyenv-version-path (f-expand ".python-version" python-version-directory))
+               (pyenv-current-version (s-trim (f-read-text pyenv-version-path 'utf-8))))
+          (set-conda-env pyenv-current-version)
+          ))))
+
+(defun set-pyvenv ()
+  "Set pyvenv matching the project name."
+  (let ((project (downcase (projectile-project-name))))
+    (if (member project (directory-files conda-home-envs)) ;; if we are in projectile and it matches a setup conda env -- use that
+        (set-conda-env (concat (file-name-as-directory conda-home-envs) project))
+      (pyvenv-python-version-file) ;; else see if there is a config file
+      )))
+
+(use-package pyvenv)
+
+(use-package elpy
+  :init (elpy-enable)
+  :after (pyvenv projectile)
+  :config
+  (set-conda-env conda-home)
+  (setq elpy-rpc-python-command "python")
+  (setq python-shell-interpreter "python"
+        python-shell-interpreter-args "-i")
+  (setq elpy-rpc-backend "jedi")
+  (add-hook 'elpy-mode-hook 'set-pyvenv))
+
+;; pdf
 
 
+(use-package pdf-tools
+  :config (pdf-tools-install))
 
-(add-to-list 'load-path (expand-file-name "scripts" user-emacs-directory))
-;;(require 'init-csv)
-(require 'init-org)
-(require 'init-git)
-(require 'init-python)
-;;(require 'init-markdown)
-;;(require 'init-haskell)
-;;(require 'init-web) ;; HTML, CSS, JS
-(require 'init-latex)
-;;(require 'init-agda)
-;;(require 'init-scala)
-(require 'init-spellchecking)
-(require 'init-cheatsheet)
+;; latex
 
-;; ;; easy keys to split window. Key based on ErgoEmacs keybinding
-;; (global-set-key (kbd "M-3") 'delete-other-windows) ; expand current pane
-;; (global-set-key (kbd "M-4") 'split-window-below) ; split pane top/bottom
-;; (global-set-key (kbd "M-2") 'delete-window) ; close current pane
-;; (global-set-key (kbd "M-s") 'other-window) ; cursor to other pane
 
-;;better automatic window split
-;;from https://stackoverflow.com/questions/2081577/setting-emacs-to-split-buffers-side-by-side
+(use-package flymake)
 
-(set-face-attribute 'default nil :height 150 :family "Ubuntu Mono" :foreground "#657b83")
+(use-package latex
+  :ensure auctex
+  :after flymake
+  :config
+  (setq auto-mode-alist (cons '("\\.tex$" . latex-mode) auto-mode-alist)
+        TeX-auto-save t
+        TeX-parse-self t
+        TeX-save-query nil
+        TeX-electric-sub-and-superscript t   ; Automatically insert
+                                             ; braces after sub- and
+                                             ; superscripts in math
+                                             ; mode
+        TeX-source-correlate-mode t
+        TeX-source-correlate-method 'synctex
+        ispell-program-name "aspell"
+        ispell-dictionary "english"
+        LaTeX-section-hook
+        '(LaTeX-section-heading
+          LaTeX-section-title
+          LaTeX-section-toc
+          LaTeX-section-section
+          LaTeX-section-label))
+
+  
+  (add-hook 'LaTeX-mode-hook 'flymake-mode)
+  (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+  (add-hook 'LaTeX-mode-hook 'flyspell-buffer)
+
+  ;; The following defadvice and defun make C-c C-s (insert section)
+  ;; behave nicly.
+  
+  (defadvice LaTeX-section (after LaTeX-section-after activate)
+    "After LaTeX-section delte the unecessarily inserted newline."
+    (delete-char -1))
+
+  (defun LaTeX-section-label()
+    (let ((is-sec (<= level 4)))
+      (progn
+        (delete-char -1)
+        (if is-sec (LaTeX-label name 'section))
+        (insert " \%\n")
+        (if is-sec (insert "\n"))
+        )
+      ))
+  )
+
+(use-package auctex-latexmk
+  :after latex
+  :config (auctex-latexmk-setup)
+  )
+
+
+;;   https://emacs.stackexchange.com/questions/21755/use-pdfview-as-default-auctex-pdf-viewer/21764
+;;   (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+;;         TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
+;;         TeX-source-correlate-start-server t)
+;;   (add-hook 'TeX-after-compilation-finished-functions
+;;             #'TeX-revert-document-buffer)
+
+;;   ;; (add-hook 'after-save-hook
+;;   ;;           (lambda ()
+;;   ;;             (when (string= major-mode 'latex-mode)
+;;   ;;               (TeX-run-latexmk
+;;   ;;                "LaTex"
+;;   ;;                (format "latexmk -synctex=1 -xelatex %s" (buffer-file-name))
+;;   ;;                (file-name-base (buffer-file-name))))))
+
+(use-package reftex                     ; TeX/BibTeX cross-reference management
+  :after latex
+  :init (add-hook 'LaTeX-mode-hook #'reftex-mode)
+  :config
+  (setq  reftex-plug-into-AUCTeX t)
+  ;; Make cref work -- https://tex.stackexchange.com/questions/119253/cleveref-auctex-and-reftex-set-up/119273#119273
+  (TeX-add-style-hook
+   "cleveref"
+   (lambda ()
+     (if (boundp 'reftex-ref-style-alist)
+         (add-to-list
+          'reftex-ref-style-alist
+          '("Cleveref" "cleveref"
+            (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
+     (reftex-ref-style-activate "Cleveref")
+     (TeX-add-symbols
+      '("cref" TeX-arg-ref)
+      '("Cref" TeX-arg-ref)
+      '("cpageref" TeX-arg-ref)
+      '("Cpageref" TeX-arg-ref))))  
+  :diminish reftex-mode)
+
+;; Disable debugging
 
 ;; Disable debugging
 (setq debug-on-error nil)

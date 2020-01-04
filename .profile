@@ -31,3 +31,5 @@ else
 fi
 
 alias e=$EDITOR
+
+export PATH="$HOME/.cargo/bin:$PATH"
