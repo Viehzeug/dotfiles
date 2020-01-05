@@ -4,14 +4,14 @@
 *  My Emacs configure
 
 
-** Resources 
+** Resources
 
 This config is mostly based on:
 - [[https://github.com/syl20bnr/spacemacs][Spacemacs]]
 - [[https://github.com/hlissner/doom-emacs][Doom Emacs]]
 - [[https://github.com/alhassy/emacs.d][alhassy's emacs.d]]
   - Lots of interesting org configuration still to review.
-- [[https://github.com/seagle0128/.emacs.d][Centaur Emacs]]  
+- [[https://github.com/seagle0128/.emacs.d][Centaur Emacs]]
 - [[https://www.sandeepnambiar.com/my-minimal-emacs-setup/][My Minimal Emacs Setup]]
 - [[https://sam217pa.github.io/2016/09/02/how-to-build-your-own-spacemacs/][How to build your own spacemacs]]
 - [[https://github.com/MatthewZMD/.emacs][M-EMACS]]
@@ -21,20 +21,22 @@ This config is mostly based on:
 - [[https://emacscast.org][EmacsCast]]
 - [[https://github.com/emacs-tw/awesome-emacs#noteworthy-configurations][Awesome Emacs]]
 - [[https://www.youtube.com/channel/UCe6ABcJkH_Gso9HJOt4x9fg][Jack of Some]]
+- [[http://ehneilsen.net/notebook/orgExamples/org-examples.html][Emacs org-mode examples and cookbook]]
+- [[https://m00natic.github.io/emacs/emacs-wiki.html][Andrey's Opinionated Emacs Guide]]
+- [[https://david.rothlis.net/emacs/howtolearn.html][How to learn Emacs]]
 
 ** ~init.el~
 To create the ~init.el~ file run ~org-babel-tangle (C-c C-v t)~.
 
 ** TODOs
-*** TODO  create cheat sheet
 *** TODO Auto update from use-package github
 *** TODO set up org-recur and  super agenda groups [[https://github.com/alphapapa/org-super-agenda]]
-*** TODO set up org-ref with org-zotxt
-*** TODO  whitespace handling
-*** TODO  use magit more
+*** TODO set up org-noter and org-ref with org-zotxt
+*** TODO [[https://orgmode.org/worg/org-contrib/org-drill.html][org-drill]]
+*** TODO use magit more
 **** https://magit.vc/screencasts/
 *** TODO investigate org-brain
-   
+
 
 ** Notes
 *** use-package
@@ -75,7 +77,7 @@ Run with debugging enabled during ~init.el~. We disable it at the end.
 ;; make sure that packages are installed
 (setq use-package-always-ensure t)
 #+END_SRC
-    
+
 *** Garbage Collector
 From https://github.com/MatthewZMD/.emacs.d:
 - Defer garbage collection further back in the startup process,
@@ -335,7 +337,7 @@ Setup the ivy auto-complete package along with swiper
 (ivy-text-search) and counsel (ivy-M-x).
 #+BEGIN_SRC emacs-lisp
 (use-package ivy
-  :diminish 
+  :diminish
   :config
   (setq ivy-use-virtual-buffers t) :init (ivy-mode 1))
 
@@ -391,11 +393,7 @@ Setup the ivy auto-complete package along with swiper
 #+BEGIN_SRC emacs-lisp
 (use-package whitespace
   :init
-  ;; (dolist (hook '(prog-mode-hook text-mode-hook))
-  ;;   (add-hook hook #'whitespace-mode))
-  (add-hook 'before-save-hook #'whitespace-cleanup)
-  :config
-  (setq whitespace-style '(space-mark tab-mark))
+  :diminish
   :bind
   ("<f11>" . whitespace-mode))
 #+END_SRC
@@ -464,7 +462,7 @@ My own cheatsheet. Based on [[https://github.com/darksmile/cheatsheet/blob/maste
 
 ;; Save a new word to personal dictionary without asking
 (setq ispell-silently-savep t))
-  
+
 (use-package flyspell
   :ensure f
   :diminish
@@ -784,7 +782,7 @@ Copied from https://github.com/alhassy/emacs.d
 
 *** pdf
 
-Disable line numbers when in pdf mode. 
+Disable line numbers when in pdf mode.
 
 #+BEGIN_SRC emacs-lisp
 (use-package pdf-tools
@@ -820,14 +818,14 @@ Disable line numbers when in pdf mode.
           LaTeX-section-section
           LaTeX-section-label))
 
-  
+
   (add-hook 'LaTeX-mode-hook 'flymake-mode)
   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
   (add-hook 'LaTeX-mode-hook 'flyspell-buffer)
 
   ;; The following defadvice and defun make C-c C-s (insert section)
   ;; behave nicly.
-  
+
   (defadvice LaTeX-section (after LaTeX-section-after activate)
     "After LaTeX-section delte the unecessarily inserted newline."
     (delete-char -1))
@@ -883,9 +881,9 @@ Disable line numbers when in pdf mode.
       '("cref" TeX-arg-ref)
       '("Cref" TeX-arg-ref)
       '("cpageref" TeX-arg-ref)
-      '("Cpageref" TeX-arg-ref))))  
+      '("Cpageref" TeX-arg-ref))))
   :diminish reftex-mode)
-#+END_SRC      
+#+END_SRC
 
 
 

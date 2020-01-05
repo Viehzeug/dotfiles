@@ -263,7 +263,7 @@
 ;; (ivy-text-search) and counsel (ivy-M-x).
 
 (use-package ivy
-  :diminish 
+  :diminish
   :config
   (setq ivy-use-virtual-buffers t) :init (ivy-mode 1))
 
@@ -315,11 +315,7 @@
 
 (use-package whitespace
   :init
-  ;; (dolist (hook '(prog-mode-hook text-mode-hook))
-  ;;   (add-hook hook #'whitespace-mode))
-  (add-hook 'before-save-hook #'whitespace-cleanup)
-  :config
-  (setq whitespace-style '(space-mark tab-mark))
+  :diminish
   :bind
   ("<f11>" . whitespace-mode))
 
@@ -386,7 +382,7 @@
 
 ;; Save a new word to personal dictionary without asking
 (setq ispell-silently-savep t))
-  
+
 (use-package flyspell
   :ensure f
   :diminish
@@ -677,7 +673,7 @@
 
 ;; pdf
 
-;; Disable line numbers when in pdf mode. 
+;; Disable line numbers when in pdf mode.
 
 
 (use-package pdf-tools
@@ -712,14 +708,14 @@
           LaTeX-section-section
           LaTeX-section-label))
 
-  
+
   (add-hook 'LaTeX-mode-hook 'flymake-mode)
   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
   (add-hook 'LaTeX-mode-hook 'flyspell-buffer)
 
   ;; The following defadvice and defun make C-c C-s (insert section)
   ;; behave nicly.
-  
+
   (defadvice LaTeX-section (after LaTeX-section-after activate)
     "After LaTeX-section delte the unecessarily inserted newline."
     (delete-char -1))
@@ -775,7 +771,7 @@
       '("cref" TeX-arg-ref)
       '("Cref" TeX-arg-ref)
       '("cpageref" TeX-arg-ref)
-      '("Cpageref" TeX-arg-ref))))  
+      '("Cpageref" TeX-arg-ref))))
   :diminish reftex-mode)
 
 ;; Disable debugging

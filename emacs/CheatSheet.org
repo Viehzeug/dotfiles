@@ -12,7 +12,6 @@ column portrait of the cheat sheet.
     "#+EXPORT_FILE_NAME: CheatSheet.pdf
      ,#+INCLUDE: CheatSheet.org
     ")
-
     (let
       ((org-export-use-babel nil))
       (org-mode)
@@ -20,6 +19,8 @@ column portrait of the cheat sheet.
       )
 )
 #+END_SRC
+
+* Setup :ignore:
 
 #+LATEX_HEADER: \def\cheatsheeturl{}
 # The following are the defaults & may be omitted.
@@ -80,6 +81,8 @@ Based on my emacs config.
 | ~M-y~   | paste, cycle through ring buffer        |
 | ~C-r~   | backward search                         |
 
+#+latex: \columnbreak
+
 *Ivy & Search*
 | ~M-x~     | (ivy) ~M-x~           |
 | ~C-s~     | (ivy) text search     |
@@ -91,9 +94,10 @@ Based on my emacs config.
 |           |                       |
 
 *Spellchecking & Company* 
-| ~<f12>~ | correct word at point                        |
-| ~<f8>~  | switch dictionary                            |
-| ~M-$n$~ | select the $n$-th suggestion in company mode |
+| ~<f12>~   | correct word at point                 |
+| ~<f8>~    | switch dictionary                     |
+| ~M-<num>~ | select the suggestion in company mode |
+|           |                                       |
 
 
 *Marking, Comments, Moving*
@@ -108,7 +112,9 @@ Based on my emacs config.
 | ~C-S-<down>~ | move selected text block down |
 | ~M-;~        | ~comment-region~              |
 | ~C-M-;~      | ~uncomment-region~            |
+| ~<f11>~      | whitespace-mode               |
 
+Delete white space by ~M-x delete-trailing-whitespace~.
 
 *Undo*
 | ~C-/~, ~C-_~ | undo            |
@@ -116,6 +122,7 @@ Based on my emacs config.
 | ~q~          | close undo tree |
 | ~s~          | select mode     |
 
+#+latex: \columnbreak
 *Window movement*
 | ~C-x 0~       | delete window                   |
 | ~C-x 1~       | maximize (delete other windows) |
@@ -167,50 +174,48 @@ Based on my emacs config.
 | ~C-c [~              | add citation (from bib)   |
 | ~C-c =~              | jump to section           |
 
+#+latex: \columnbreak
+
 * Amethyst on Mac
+| ~⎇-⌘-space~   | cycle layout forward              |
+| ~⎇-⇧-⌘-space~ | cycle layout backwards            |
+| ~⎇-⌘-⏎~       | swap focused window with main     |
+| ~⎇-⌘-H~       | shrink main pane                  |
+| ~⎇-⌘-L~       | expand main pane                  |
+| ~⎇-⌘-,~       | increase main pane count          |
+| ~⎇-⌘-.~       | decrease main pane count          |
+| ~⎇-⌘-J~       | move focus counter clockwise (cc) |
+| ~⎇-⌘-K~       | move focus clockwise              |
+| ~⎇-⌘-M~       | move focus to main                |
+| ~⎇-⌘-P~       | move focus to cc screen           |
+| ~⎇-⌘-N~       | move focus to clockwise screen    |
+| ~⎇-⇧-⌘-H~     | swap foc window to cc screen      |
+| ~⎇-⇧-⌘-L~     | swap foc window to clock. screen  |
+| ~⎇-⇧-⌘-J~     | swap foc window cc screen         |
+| ~⎇-⇧-⌘-K~     | swap foc window clockwise         |
+| ~⎇-⌘-Z~       | force windows to be reevaluated   |
+| ~⎇-⇧-⌘-←~     | throw foc window to space left    |
+| ~⎇-⇧-⌘-→~     | throw foc window to space right   |
+| ~⎇-⇧-⌘-n~     | throw focus window to space n     |
+|               | $n \in \{0, \dots, 9\}$           |
+| ~⎇-⌘-W~       | focus screen 1                    |
+| ~⎇-⇧-⌘-W~     | throw focused window to screen 1  |
+| ~⎇-⌘-E~       | focus screen 2                    |
+| ~⎇-⇧-⌘-E~     | throw focused window to screen 2  |
+| ~⎇-⌘-R~       | focus screen 3                    |
+| ~⎇-⇧-⌘-R~     | throw focused window to screen 3  |
+| ~⎇-⌘-Q~       | focus screen 4                    |
+| ~⎇-⇧-⌘-Q~     | throw focused window to screen 4  |
+| ~⎇-⌘-T~       | toggle float for focused window   |
+| ~⎇-⌘-I~       | display current layout            |
+| ~⎇-⌘-A~       | select tall layout                |
+| ~⎇-⌘-D~       | select fullscreen layout          |
+| ~⎇-⌘-F~       | select floating layout            |
 
 
-| ~⎇-⌘-space~   | cycle layout forward                                     |
-| ~⎇-⇧-⌘-space~ | cycle layout backwards                                   |
-| ~⎇-⌘-⏎~       | swap focused window with main                            |
-| ~⎇-⌘-H~       | shrink main pane                                         |
-| ~⎇-⌘-L~       | expand main pane                                         |
-| ~⎇-⌘-,~       | increase main pane count                                 |
-| ~⎇-⌘-.~       | decrease main pane count                                 |
-| ~⎇-⌘-J~       | move focus counter clockwise                             |
-| ~⎇-⌘-K~       | move focus clockwise                                     |
-| ~⎇-⌘-M~       | move focus to main                                       |
-| ~⎇-⌘-P~       | move focus to counter clockwise screen                   |
-| ~⎇-⌘-N~       | move focus to clockwise screen                           |
-| ~⎇-⇧-⌘-H~     | swap focused window to counter clockwise screen          |
-| ~⎇-⇧-⌘-L~     | swap focused window to clockwise screen                  |
-| ~⎇-⇧-⌘-J~     | swap focused window counter clockwise                    |
-| ~⎇-⇧-⌘-K~     | swap focused window clockwise                            |
-| ~⎇-⌘-Z~       | force windows to be reevaluated                          |
-| ~⎇-⇧-⌘-←~     | throw focused window to space left                       |
-| ~⎇-⇧-⌘-→~     | throw focused window to space right                      |
-| ~⎇-⇧-⌘-n~     | throw focused window to space n, $n \in \{0, \dots, 9\}$ |
-| ~⎇-⌘-W~       | focus screen 1                                           |
-| ~⎇-⇧-⌘-W~     | throw focused window to screen 1                         |
-| ~⎇-⌘-E~       | focus screen 2                                           |
-| ~⎇-⇧-⌘-E~     | throw focused window to screen 2                         |
-| ~⎇-⌘-R~       | focus screen 3                                           |
-| ~⎇-⇧-⌘-R~     | throw focused window to screen 3                         |
-| ~⎇-⌘-Q~       | focus screen 4                                           |
-| ~⎇-⇧-⌘-Q~     | throw focused window to screen 4                         |
-| ~⎇-⌘-T~       | toggle float for focused window                          |
-| ~⎇-⌘-I~       | display current layout                                   |
-| ~⎇-⌘-A~       | select tall layout                                       |
-| ~⎇-⌘-D~       | select fullscreen layout                                 |
-| ~⎇-⌘-F~       | select floating layout                                   |
-
-* Terminal
-See Copy & Paste section.
-
-| ~C-j~ | search at current history entry |
+#+latex: \columnbreak
 
 * Tmux
-
 | ~C-b s~ | list sessions    |
 | ~C-b $~ | name session     |
 | ~C-b c~ | create window    |
@@ -224,6 +229,20 @@ See Copy & Paste section.
 | ~C-b \~ | horizontal split |
 | ~C-b x~ | kill pane        |
 | ~C-b d~ | detach           |
+
+#+latex: \vfill
+#+latex: \columnbreak
+
+* Terminal
+See Copy & Paste section.
+
+| ~C-j~ | search at current history entry |
+
+#+latex: \vfill
+#+latex: \columnbreak
+
+
+
 
 # Local Variables:
 # eval: (setq org-highlight-latex-and-related '(latex))
