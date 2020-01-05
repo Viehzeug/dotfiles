@@ -110,16 +110,23 @@
   :ensure org ;;org-plus-contrib ;; currently seems broken
   :pin org ; only download orgmode from the org server
   :init
-  (setq org-log-done t
-        org-agenda-files '("~/org")
-	org-catch-invisible-edits 'show
-	org-confirm-babel-evaluate nil ;; run without confirmation
-	org-src-preserve-indentation t ;; preserve indentation at export
-	org-highlight-latex-and-related '(latex))
+  (setq org-agenda-files '("~/org")
+	      org-catch-invisible-edits 'show
+	      org-confirm-babel-evaluate nil ;; run without confirmation
+	      org-src-preserve-indentation t ;; preserve indentation at export
+	      org-highlight-latex-and-related '(latex)
+
+        ;; Make org and org-recur work nicely
+        ;; Log time a task was set to Done.
+        org-log-done (quote time)
+        ;; Don't log the time a task was rescheduled or redeadlined.
+        org-log-redeadline nil
+        org-log-reschedule nil
+        org-read-date-prefer-future 'time
+        )
 
   :bind ("\C-ca" . org-agenda)
   :config
-  (require 'org)
 
   ;; Allow the :ignore: to ignore headers in exporing
   ;; wait until org-plus is not broken
@@ -131,6 +138,19 @@
   (require 'ox-extra)
   (ox-extras-activate '(ignore-headlines))
 
+
+  ;; make org play well with org reccur
+  ;; Refresh org-agenda after rescheduling a task.
+  (defun org-agenda-refresh ()
+    "Refresh all `org-agenda' buffers."
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (when (derived-mode-p 'org-agenda-mode)
+          (org-agenda-maybe-redo)))))
+
+  (defadvice org-schedule (after refresh-agenda activate)
+  "Refresh org-agenda."
+  (org-agenda-refresh))
 
   ;; Try to minimize org sync conflicts by autosaving (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
   (add-hook 'auto-save-hook 'org-save-all-org-buffers) ;; enable autosaves
