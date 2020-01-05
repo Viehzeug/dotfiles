@@ -1,0 +1,3 @@
+[submodule "emacs/CheatSheet"]
+	path = emacs/CheatSheet
+	url = https://github.com/alhassy/CheatSheet.git

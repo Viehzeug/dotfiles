@@ -101,6 +101,80 @@
 (defvar backup-dir (expand-file-name "~/.emacs.d/emacs_backup/"))
 (defvar autosave-dir (expand-file-name "~/.emacs.d/autosave/"))
 
+;; org mode
+;; org mode is very early in the config to ensure that org from the org
+;; elpa rather than melpa is loaded.
+
+
+(use-package org
+  :ensure org ;;org-plus-contrib ;; currently seems broken
+  :pin org ; only download orgmode from the org server
+  :init
+  (setq org-log-done t
+        org-agenda-files '("~/org")
+	org-catch-invisible-edits 'show
+	org-confirm-babel-evaluate nil ;; run without confirmation
+	org-src-preserve-indentation t ;; preserve indentation at export
+	org-highlight-latex-and-related '(latex))
+
+  :bind ("\C-ca" . org-agenda)
+  :config
+  (require 'org)
+
+  ;; Allow the :ignore: to ignore headers in exporing
+  ;; wait until org-plus is not broken
+  ;;(require 'ox-extra)
+  ;;(ox-extras-activate '(ignore-headlines))
+
+  ;; manual workaround
+  (add-to-list 'load-path "~/dotfiles/emacs/elpa/org-contrib/")
+  (require 'ox-extra)
+  (ox-extras-activate '(ignore-headlines))
+
+
+  ;; Try to minimize org sync conflicts by autosaving (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
+  (add-hook 'auto-save-hook 'org-save-all-org-buffers) ;; enable autosaves
+  )
+
+(defun org-toggle-link-display ()
+  "Toggle the literal or descriptive display of links."
+  (interactive)
+  (if org-descriptive-links
+      (progn (org-remove-from-invisibility-spec '(org-link))
+         (org-restart-font-lock)
+         (setq org-descriptive-links nil))
+    (progn (add-to-invisibility-spec '(org-link))
+       (org-restart-font-lock)
+       (setq org-descriptive-links t))))
+
+(setq org-image-actual-width nil)
+
+(use-package org-super-agenda
+  :after org
+  :config
+  (org-super-agenda-mode))
+
+(use-package org-zotxt
+  :ensure zotxt
+  :diminish
+  :after org
+  :init (add-hook 'org-mode-hook #'org-zotxt-mode)
+)
+
+(use-package org-recur
+  :hook ((org-mode . org-recur-mode)
+         (org-agenda-mode . org-recur-agenda-mode))
+  :demand t
+  :config
+  (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
+
+  ;; Rebind the 'd' key in org-agenda (default: `org-agenda-day-view').
+  (define-key org-recur-agenda-mode-map (kbd "d") 'org-recur-finish)
+  (define-key org-recur-agenda-mode-map (kbd "C-c d") 'org-recur-finish)
+
+  (setq org-recur-finish-done t
+        org-recur-finish-archive t))
+
 ;; Theme
 
 ;; Theme
@@ -277,130 +351,26 @@
   :config (which-key-mode)
           (setq which-key-idle-delay 0.05))
 
-;; TODO Cheatsheet
 
-(use-package cheatsheet
-  :bind ("C-<f1>" . cheatsheet-show)
-  :config
-  (cheatsheet-add :group 'Common
-                  :key "C-x C-c"
-                  :description "leave Emacs.")
-  (cheatsheet-add :group 'Common
-                  :key "C-_"
-                  :description "undo")
-  
-  (cheatsheet-add :group 'Move
-                  :key "C-f"
-                  :description "forward char")
-  (cheatsheet-add :group 'Move
-                  :key "C-b"
-                  :description "backward char")
-  (cheatsheet-add :group 'Move
-                  :key "M-f"
-                  :description "forward word")
-  (cheatsheet-add :group 'Move
-                  :key "M-b"
-                  :description "backward word")
-  (cheatsheet-add :group 'Move
-                  :key "C-n"
-                  :description "forward line")
-  (cheatsheet-add :group 'Move
-                  :key "C-p"
-                  :description "backward line")
-  (cheatsheet-add :group 'Move
-                  :key "M-e"
-                  :description "forward sentence")
-  (cheatsheet-add :group 'Move
-                  :key "M-a"
-                  :description "backward sentence")
-  (cheatsheet-add :group 'Move
-                  :key "C-M-f"
-                  :description "forward expression")
-  (cheatsheet-add :group 'Move
-                  :key "C-M-b"
-                  :description "backward expression")
-  (cheatsheet-add :group 'Move
-                  :key "M-}"
-                  :description "forward paragraph")
-  (cheatsheet-add :group 'Move
-                  :key "M-{"
-                  :description "backward paragraph")
 
-  (cheatsheet-add :group 'Delete
-                  :key "C-d"
-                  :description "forward char")
-  (cheatsheet-add :group 'Delete
-                  :key "DEL"
-                  :description "backward char")
-  (cheatsheet-add :group 'Delete
-                  :key "M-d"
-                  :description "forward word")
-  (cheatsheet-add :group 'Delete
-                  :key "M-DEL"
-                  :description "backward word (same as C-w)")
-  (cheatsheet-add :group 'Delete
-                  :key "C-k"
-                  :description "forward line")  
-  
-  (cheatsheet-add :group 'Terminal
-                  :key "C-w"
-                  :description "cut to previous white space")
-  (cheatsheet-add :group 'Terminal
-                  :key "C-y"
-                  :description "paste last cut text")
-  (cheatsheet-add :group 'Terminal
-                  :key "M-y"
-                  :description "loop through last cut text")
-  (cheatsheet-add :group 'Terminal
-                  :key "C-r"
-                  :description "search as you type (twice to search)")
-  (cheatsheet-add :group 'Terminal
-                  :key "C-j"
-                  :description "end search at current history entry")
-  
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b s"
-                  :description "list sessions")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b $"
-                  :description "name session")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b c"
-                  :description "create window (tab)")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b w"
-                  :description "list windows (tabs)")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b n"
-                  :description "next window (tab)")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b p"
-                  :description "previous window (tab)")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b f"
-                  :description "find window (tab)")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b ,"
-                  :description "name window (tab)")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b &"
-                  :description "kill window (tab)")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b %"
-                  :description "vertical split")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b \""
-                  :description "horizontal split")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b x"
-                  :description "kill pane")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b <SPC>"
-                  :description "toggle between layouts")
-  (cheatsheet-add :group 'Tmux
-                  :key "C-b d"
-                  :description "detach")  
-  )
+;; My own cheatsheet. Based on [[https://github.com/darksmile/cheatsheet/blob/master/cheatsheet.el][cheatsheet.el]].
+
+(defun cheatsheet-show ()
+  "Create buffer and show cheatsheet."
+  (interactive)
+  ;;(switch-to-buffer-other-window "*cheatsheet*")
+  ;;(erase-buffer)
+  (find-file (concat user-emacs-directory "CheatSheet.pdf"))
+  (rename-buffer "*cheatsheet*")
+  (setq buffer-read-only t))
+
+(defun cheatsheet-toggle()
+  (interactive)
+  (if (get-buffer "*cheatsheet*")
+    (kill-buffer "*cheatsheet*")
+    (cheatsheet-show)))
+
+(global-set-key (kbd "C-<f1>") 'cheatsheet-toggle)
 
 ;; Spellchecking
 
@@ -590,12 +560,7 @@
             (?h aw-split-window-horz "Ace - Split Horz Window")
             (?m delete-other-windows "Ace - Maximize Window")
             (?g delete-other-windows)
-            (?b balance-windows)
-            (?u (lambda ()
-                   (progn
-                        (winner-undo)
-			(setq this-command 'winner-undo))))
-            (?r winner-redo)))
+            (?b balance-windows)))
 
     (defhydra hydra-window-size (:color red)
          "Windows size"
@@ -659,63 +624,6 @@
 ;; ledger mode
 (use-package ledger-mode)
 
-;; org
-
-
-(use-package org
-  :init
-  (setq org-log-done t
-        org-agenda-files '("~/org")
-	org-catch-invisible-edits 'show
-	org-confirm-babel-evaluate nil ;; run without confirmation
-	org-src-preserve-indentation t ;; preserve indentation at export
-	org-highlight-latex-and-related '(latex))
-
-  :bind ("\C-ca" . org-agenda)
-  :config
-  (add-hook 'after-init-hook 'org-todo-list)
-  ;; Try to minimize org sync conflicts by autosaving (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
-  (add-hook 'auto-save-hook 'org-save-all-org-buffers) ;; enable autosaves
-  )
-
-(defun org-toggle-link-display ()
-  "Toggle the literal or descriptive display of links."
-  (interactive)
-  (if org-descriptive-links
-      (progn (org-remove-from-invisibility-spec '(org-link))
-         (org-restart-font-lock)
-         (setq org-descriptive-links nil))
-    (progn (add-to-invisibility-spec '(org-link))
-       (org-restart-font-lock)
-       (setq org-descriptive-links t))))
-
-(setq org-image-actual-width nil)
-
-(use-package org-super-agenda
-  :config
-  (org-super-agenda-mode))
-
-(use-package org-zotxt
-  :ensure zotxt
-  :diminish
-  :after org
-  :init (add-hook 'org-mode-hook #'org-zotxt-mode)
-)
-
-(use-package org-recur
-  :hook ((org-mode . org-recur-mode)
-         (org-agenda-mode . org-recur-agenda-mode))
-  :demand t
-  :config
-  (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
-
-  ;; Rebind the 'd' key in org-agenda (default: `org-agenda-day-view').
-  (define-key org-recur-agenda-mode-map (kbd "d") 'org-recur-finish)
-  (define-key org-recur-agenda-mode-map (kbd "C-c d") 'org-recur-finish)
-
-  (setq org-recur-finish-done t
-        org-recur-finish-archive t))
-
 ;; git
 
 (use-package magit)
@@ -769,9 +677,12 @@
 
 ;; pdf
 
+;; Disable line numbers when in pdf mode. 
+
 
 (use-package pdf-tools
-  :config (pdf-tools-install))
+  :config (pdf-tools-install)
+  :init (add-hook 'pdf-view-mode-hook (lambda() (linum-mode -1))))
 
 ;; latex
 
