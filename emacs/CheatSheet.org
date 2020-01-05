@@ -21,8 +21,6 @@ column portrait of the cheat sheet.
 )
 #+END_SRC
 
-* LaTeX Extra, Local, Setup  :ignore:
-
 #+LATEX_HEADER: \def\cheatsheeturl{}
 # The following are the defaults & may be omitted.
 #+LATEX_HEADER: \def\cheatsheetcols{3}
@@ -86,7 +84,7 @@ Based on my emacs config.
 | ~M-x~     | (ivy) ~M-x~           |
 | ~C-s~     | (ivy) text search     |
 | ~C-c C-r~ | (ivy) resume          |
-| ~C-c p~   | (ivy) git             |
+| ~C-c p~   | (ivy) find file git   |
 | ~C-c g~   | (ivy) ~rg~            |
 | ~C-c C-g~ | ~rg~ (full interface) |
 | ~C-x C-f~ | (ivy) find-file       |
