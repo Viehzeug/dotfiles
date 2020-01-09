@@ -15,6 +15,7 @@ This config is mostly based on:
 - [[https://www.sandeepnambiar.com/my-minimal-emacs-setup/][My Minimal Emacs Setup]]
 - [[https://sam217pa.github.io/2016/09/02/how-to-build-your-own-spacemacs/][How to build your own spacemacs]]
 - [[https://github.com/MatthewZMD/.emacs][M-EMACS]]
+- [[https://blog.aaronbieber.com/2017/03/19/organizing-notes-with-refile.html][Organizing Notes With Refile]]
 
 *** Further Resources
 - [[http://emacsrocks.com/][Emacs Rocks]]
@@ -148,6 +149,19 @@ script checks if the font is installed and else runs the command.
   :hook (dired-mode . all-the-icons-dired-mode))
 #+END_SRC
 
+
+*** Auto-Update
+#+BEGIN_SRC emacs-lisp
+(use-package auto-package-update
+  :config
+  ;; Delete residual old versions
+  (setq auto-package-update-delete-old-versions t)
+  ;; Do not bother me when updates have taken place.
+  (setq auto-package-update-hide-results t)
+  ;; Update installed packages at startup if there is an update pending.
+  (auto-package-update-maybe))
+#+END_SRC
+
 *** Personal Setup
 #+BEGIN_SRC emacs-lisp
 (setq user-full-name "Marc Fischer")
@@ -176,7 +190,7 @@ elpa rather than melpa is loaded.
   :ensure org ;;org-plus-contrib ;; currently seems broken
   :pin org ; only download orgmode from the org server
   :init
-  (setq org-agenda-files '("~/org")
+  (setq org-agenda-files '("~/org/todo.org" "~/org/in.org" "~/org/projects.org")
 	      org-catch-invisible-edits 'show
 	      org-confirm-babel-evaluate nil ;; run without confirmation
 	      org-src-preserve-indentation t ;; preserve indentation at export
@@ -204,6 +218,12 @@ elpa rather than melpa is loaded.
   (require 'ox-extra)
   (ox-extras-activate '(ignore-headlines))
 
+  ;; refile setup
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 2)) ;; show two levels of headings
+        org-refile-allow-creating-parent-nodes 'confirm        ;; allow to create new nodes
+        org-refile-use-outline-path 'file                      ;; allow to file to top level of files
+        org-outline-path-complete-in-steps nil                 ;; present all possilbe paths at once
+  )
 
   ;; make org play well with org reccur
   ;; Refresh org-agenda after rescheduling a task.
@@ -235,6 +255,7 @@ elpa rather than melpa is loaded.
 
 (setq org-image-actual-width nil)
 
+
 (use-package org-super-agenda
   :after org
   :config
@@ -242,6 +263,7 @@ elpa rather than melpa is loaded.
 
 (use-package org-zotxt
   :ensure zotxt
+  :pin melpa ;; use newest verions
   :diminish
   :after org
   :init (add-hook 'org-mode-hook #'org-zotxt-mode)
