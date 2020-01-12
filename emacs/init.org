@@ -29,23 +29,12 @@ This config is mostly based on:
 ** ~init.el~
 To create the ~init.el~ file run ~org-babel-tangle (C-c C-v t)~.
 
-** TODOs
-*** TODO Auto update from use-package github
-*** TODO set  super agenda groups [[https://github.com/alphapapa/org-super-agenda]]
-*** TODO set up org-noter and org-ref with org-zotxt
-*** TODO [[https://orgmode.org/worg/org-contrib/org-drill.html][org-drill]]
-*** TODO use magit more
-**** https://magit.vc/screencasts/
-*** TODO investigate org-brain
-
-
 ** Notes
 *** use-package
 - ~:diminish~ is the text that will be displayed in the modeline. To
   not clutter it we often set is as the empty string.
 - ~:defer n~ is loaded after ~n~ seconds if not loaded yet. However,
   ~use-package~ is naturally lazy.
-
 
 ** General Emacs Setup
 *** Enable Debugging
@@ -268,6 +257,9 @@ elpa rather than melpa is loaded.
   :config
   (org-super-agenda-mode))
 
+(use-package org-noter
+:after org)
+
 (use-package org-zotxt
   :ensure zotxt
   :pin melpa ;; use newest verions
@@ -290,6 +282,9 @@ elpa rather than melpa is loaded.
   (setq org-recur-finish-done t
         org-recur-finish-archive t))
 #+END_SRC
+
+#+RESULTS:
+| org-recur-agenda-mode |
 
 
 
@@ -546,7 +541,6 @@ My own cheatsheet. Based on [[https://github.com/darksmile/cheatsheet/blob/maste
    ("<f8>" .   'fd-switch-dictionary)))
 #+END_SRC
 
-**** TODO set better shortcuts
 
 *** Writegood
 #+BEGIN_SRC emacs-lisp
@@ -555,7 +549,7 @@ My own cheatsheet. Based on [[https://github.com/darksmile/cheatsheet/blob/maste
   :diminish
   :config
   (--map (push it writegood-weasel-words) ;; some words form https://github.com/alhassy/emacs.d#cosmetics
-         '("some" "simple" "simply" "easy" "often" "easily" "probably"
+         '("some" "simple" "simply" "easy" "often" "easily" "probably" "really"
            "clearly"               ;; Is the premise undeniably true?
            "experience shows"      ;; Whose? What kind? How does it do so?
            "may have"              ;; It may also have not!
@@ -577,7 +571,7 @@ In CamelCase treat all words as words.
   :init (global-flycheck-mode)
   :custom (flycheck-display-errors-delay .3))
 #+END_SRC
-*** Remove Buffers
+*** Revert Buffers
 #+BEGIN_SRC emacs-lisp
 (global-set-key [f5] '(lambda () (interactive) (revert-buffer nil t nil)))
 #+END_SRC
@@ -630,19 +624,21 @@ In CamelCase treat all words as words.
         ;; Immediately activate completion.
         company-idle-delay 0))
 #+END_SRC
-**** TODO set shortcuts for companymode
 
 
 *** Projectile
-Currently unused.
+Currently unused, but still here as dependency for some features (see
+Python section).
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package projectile
-  ;;   :config
-  ;;   (projectile-global-mode +1))
+   (use-package projectile
+     :diminish
+     :config
+     (projectile-global-mode +1))
 
-  ;; (use-package counsel-projectile
-  ;;   :config
-  ;;   (counsel-projectile-mode))
+   (use-package counsel-projectile
+     :diminish 
+     :config
+     (counsel-projectile-mode))
 #+END_SRC
 
 
@@ -824,7 +820,8 @@ Copied from https://github.com/alhassy/emacs.d
   (set-conda-env conda-home)
   (setq elpy-rpc-python-command "python")
   (setq python-shell-interpreter "python"
-        python-shell-interpreter-args "-i")
+        python-shell-interpreter-args "-i"
+        python-indent-offset 4)
   (setq elpy-rpc-backend "jedi")
   (add-hook 'elpy-mode-hook 'set-pyvenv))
 #+END_SRC

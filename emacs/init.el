@@ -199,6 +199,9 @@
   :config
   (org-super-agenda-mode))
 
+(use-package org-noter
+:after org)
+
 (use-package org-zotxt
   :ensure zotxt
   :pin melpa ;; use newest verions
@@ -469,7 +472,7 @@
   :diminish
   :config
   (--map (push it writegood-weasel-words) ;; some words form https://github.com/alhassy/emacs.d#cosmetics
-         '("some" "simple" "simply" "easy" "often" "easily" "probably"
+         '("some" "simple" "simply" "easy" "often" "easily" "probably" "really"
            "clearly"               ;; Is the premise undeniably true?
            "experience shows"      ;; Whose? What kind? How does it do so?
            "may have"              ;; It may also have not!
@@ -489,7 +492,7 @@
   :init (global-flycheck-mode)
   :custom (flycheck-display-errors-delay .3))
 
-;; Remove Buffers
+;; Revert Buffers
 
 (global-set-key [f5] '(lambda () (interactive) (revert-buffer nil t nil)))
 
@@ -540,15 +543,18 @@
         company-idle-delay 0))
 
 ;; Projectile
-;; Currently unused.
+;; Currently unused, but still here as dependency for some features (see
+;; Python section).
 
-  ;; (use-package projectile
-  ;;   :config
-  ;;   (projectile-global-mode +1))
+   (use-package projectile
+     :diminish
+     :config
+     (projectile-global-mode +1))
 
-  ;; (use-package counsel-projectile
-  ;;   :config
-  ;;   (counsel-projectile-mode))
+   (use-package counsel-projectile
+     :diminish 
+     :config
+     (counsel-projectile-mode))
 
 ;; Block movement of regions
 ;; Move code regions up and down with ~C-S-<up>~ and ~C-S-<down>~ (similar to Eclipse).
@@ -713,7 +719,8 @@
   (set-conda-env conda-home)
   (setq elpy-rpc-python-command "python")
   (setq python-shell-interpreter "python"
-        python-shell-interpreter-args "-i")
+        python-shell-interpreter-args "-i"
+        python-indent-offset 4)
   (setq elpy-rpc-backend "jedi")
   (add-hook 'elpy-mode-hook 'set-pyvenv))
 
