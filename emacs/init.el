@@ -1,3 +1,11 @@
+;; Enable Debugging
+;; Run with debugging enabled during ~init.el~. We disable it at the end.
+
+
+;; only debug during init; disabled at end.
+(setq debug-on-error t)
+(setq debug-on-quit t)
+
 ;; Load ~use-package~
 
 
@@ -832,27 +840,5 @@
 ;; Disable debugging
 (setq debug-on-error nil)
 (setq debug-on-quit nil)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(auto-revert-interval 3)
- '(auto-revert-use-notify nil)
- '(avy-style (quote pre))
- '(avy-timeout-seconds 0.3)
- '(doom-modeline-height 15)
- '(doom-modeline-icon t)
- '(doom-modeline-major-mode-color-icon t)
- '(doom-modeline-minor-modes t)
- '(flycheck-display-errors-delay 0.3)
- '(inhibit-compacting-font-caches t t)
- '(package-selected-packages
-   (quote
-    (org-noter zotxt writegood-mode which-key use-package undo-tree smartparens ripgrep pdf-tools org-super-agenda org-recur mwim move-text magit ledger-mode hydra flyspell-correct-ivy flycheck expand-region exec-path-from-shell elpy doom-modeline diminish counsel color-theme-solarized cheatsheet beacon auto-package-update auctex-latexmk all-the-icons-dired aggressive-indent ag ace-window))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(avy-lead-face ((t (:background "#51afef" :foreground "#870000" :weight bold)))))
+
+default

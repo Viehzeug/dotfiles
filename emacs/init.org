@@ -29,6 +29,26 @@ This config is mostly based on:
 ** ~init.el~
 To create the ~init.el~ file run ~org-babel-tangle (C-c C-v t)~.
 
+** Install
+#+BEGIN_SRC bash :tangle no
+cd ~
+git clone https://github.com/plexus/chemacs.git
+cd chemacs
+./install.sh
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs-profiles.el
+(("default" . ((user-emacs-directory . "~/dotfiles/emacs")))
+ ("spacemacs" . ((user-emacs-directory . "~/spacemacs")))
+ ("prelude" . ((user-emacs-directory . "~/prelude")))
+ ("doom" . ((user-emacs-directory . "~/doom-emacs")))
+ ("purcell" . ((user-emacs-directory . "~/purcell.emacs.d"))))
+#+END_SRC
+
+#+BEGIN_SRC :tangle ~/.emacs-profile
+default
+#+END_SRC
+
 ** Notes
 *** use-package
 - ~:diminish~ is the text that will be displayed in the modeline. To
@@ -44,7 +64,7 @@ Run with debugging enabled during ~init.el~. We disable it at the end.
 ;; only debug during init; disabled at end.
 (setq debug-on-error t)
 (setq debug-on-quit t)
-#+END_SRCt
+#+END_SRC
 
 *** Load ~use-package~
 
