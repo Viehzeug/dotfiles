@@ -86,6 +86,17 @@
 (use-package all-the-icons-dired
   :hook (dired-mode . all-the-icons-dired-mode))
 
+;; Auto-Update
+
+(use-package auto-package-update
+  :config
+  ;; Delete residual old versions
+  (setq auto-package-update-delete-old-versions t)
+  ;; Do not bother me when updates have taken place.
+  (setq auto-package-update-hide-results t)
+  ;; Update installed packages at startup if there is an update pending.
+  (auto-package-update-maybe))
+
 ;; Personal Setup
 
 (setq user-full-name "Marc Fischer")
@@ -110,7 +121,7 @@
   :ensure org ;;org-plus-contrib ;; currently seems broken
   :pin org ; only download orgmode from the org server
   :init
-  (setq org-agenda-files '("~/org")
+  (setq org-agenda-files '("~/org/todo.org" "~/org/in.org" "~/org/projects.org")
 	      org-catch-invisible-edits 'show
 	      org-confirm-babel-evaluate nil ;; run without confirmation
 	      org-src-preserve-indentation t ;; preserve indentation at export
@@ -138,6 +149,12 @@
   (require 'ox-extra)
   (ox-extras-activate '(ignore-headlines))
 
+  ;; refile setup
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 2)) ;; show two levels of headings
+        org-refile-allow-creating-parent-nodes 'confirm        ;; allow to create new nodes
+        org-refile-use-outline-path 'file                      ;; allow to file to top level of files
+        org-outline-path-complete-in-steps nil                 ;; present all possilbe paths at once
+  )
 
   ;; make org play well with org reccur
   ;; Refresh org-agenda after rescheduling a task.
@@ -169,6 +186,14 @@
 
 (setq org-image-actual-width nil)
 
+(use-package org-noter
+    :after org
+    :config
+    (setq org-noter-always-create-frame nil
+          org-noter-insert-note-no-questions t
+          org-noter-separate-notes-from-heading t
+          org-noter-auto-save-last-location t))
+
 (use-package org-super-agenda
   :after org
   :config
@@ -176,6 +201,7 @@
 
 (use-package org-zotxt
   :ensure zotxt
+  :pin melpa ;; use newest verions
   :diminish
   :after org
   :init (add-hook 'org-mode-hook #'org-zotxt-mode)
@@ -799,3 +825,27 @@
 ;; Disable debugging
 (setq debug-on-error nil)
 (setq debug-on-quit nil)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(auto-revert-interval 3)
+ '(auto-revert-use-notify nil)
+ '(avy-style (quote pre))
+ '(avy-timeout-seconds 0.3)
+ '(doom-modeline-height 15)
+ '(doom-modeline-icon t)
+ '(doom-modeline-major-mode-color-icon t)
+ '(doom-modeline-minor-modes t)
+ '(flycheck-display-errors-delay 0.3)
+ '(inhibit-compacting-font-caches t t)
+ '(package-selected-packages
+   (quote
+    (org-noter zotxt writegood-mode which-key use-package undo-tree smartparens ripgrep pdf-tools org-super-agenda org-recur mwim move-text magit ledger-mode hydra flyspell-correct-ivy flycheck expand-region exec-path-from-shell elpy doom-modeline diminish counsel color-theme-solarized cheatsheet beacon auto-package-update auctex-latexmk all-the-icons-dired aggressive-indent ag ace-window))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(avy-lead-face ((t (:background "#51afef" :foreground "#870000" :weight bold)))))

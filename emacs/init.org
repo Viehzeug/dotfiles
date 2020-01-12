@@ -255,6 +255,13 @@ elpa rather than melpa is loaded.
 
 (setq org-image-actual-width nil)
 
+(use-package org-noter
+    :after org
+    :config
+    (setq org-noter-always-create-frame nil
+          org-noter-insert-note-no-questions t
+          org-noter-separate-notes-from-heading t
+          org-noter-auto-save-last-location t))
 
 (use-package org-super-agenda
   :after org
