@@ -129,7 +129,7 @@
   :ensure org ;;org-plus-contrib ;; currently seems broken
   :pin org ; only download orgmode from the org server
   :init
-  (setq org-agenda-files '("~/org/todo.org" "~/org/in.org" "~/org/projects.org")
+  (setq org-agenda-files '("~/org/") ;;'("~/org/todo.org" "~/org/in.org" "~/org/projects.org")
 	      org-catch-invisible-edits 'show
 	      org-confirm-babel-evaluate nil ;; run without confirmation
 	      org-src-preserve-indentation t ;; preserve indentation at export
@@ -235,18 +235,23 @@
 ;; Theme
 
 ;; Theme
-(use-package color-theme-solarized)
-(setq frame-background-mode 'light)
-;; (setq solarized-termcolors 256)
+(use-package doom-themes
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-solarized-light t)
 
-(set-face-attribute 'default nil :height 150 :family "Ubuntu Mono" :foreground "#657b83")
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
 
-(if (daemonp)
-(add-hook 'after-make-frame-functions
-          '(lambda (f)
-             (with-selected-frame f
-               (when (window-system f) (load-theme 'solarized t)))))
-(load-theme 'solarized t))
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config)
+
+  ;; set font
+  (set-face-attribute 'default nil :family "Ubuntu Mono" :height 150)
+  
+)
 
 ;; show linenumbers
 (global-linum-mode t)
@@ -282,9 +287,10 @@
 (use-package beacon
    :config (beacon-mode +1))
 
-;; disable bell sound; but flash visual bell
+;; disable bell sound
 (setq ring-bell-function 'ignore
-       visible-bell 1)
+;;       visible-bell 1 ;; we already have the doom-theme bell setup
+)
 
 ;; nice scrolling
 (setq scroll-margin 0
@@ -335,7 +341,7 @@
   ("M-s" . swiper-all)
   ("C-c C-r" . ivy-resume)
   ("C-c p" . counsel-git)
-  ("C-c g" . counsel-rg)
+  ("C-c r" . counsel-rg)
   ("C-x C-f" . counsel-find-file)
   (("M-y" . counsel-yank-pop)
   :map ivy-minibuffer-map
@@ -346,7 +352,7 @@
 
 (use-package ripgrep
   :bind
-  ("C-c C-g" . ripgrep-regexp))
+  ("C-c C-r" . ripgrep-regexp))
 (use-package ag) ;; currently not used but frequently experimented with
 
 ;; Buffers
@@ -374,7 +380,8 @@
   :init
   :diminish
   :bind
-  ("<f11>" . whitespace-mode))
+  ("<f11>" . whitespace-mode)
+  ("C-c w" . delete-trailing-whitespace))
 
 ;; comments
 

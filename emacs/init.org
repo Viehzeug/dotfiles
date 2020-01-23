@@ -38,11 +38,7 @@ cd chemacs
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs-profiles.el
-(("default" . ((user-emacs-directory . "~/dotfiles/emacs")))
- ("spacemacs" . ((user-emacs-directory . "~/spacemacs")))
- ("prelude" . ((user-emacs-directory . "~/prelude")))
- ("doom" . ((user-emacs-directory . "~/doom-emacs")))
- ("purcell" . ((user-emacs-directory . "~/purcell.emacs.d"))))
+(("default" . ((user-emacs-directory . "~/dotfiles/emacs"))))
 #+END_SRC
 
 #+BEGIN_SRC :tangle ~/.emacs-profile
@@ -193,13 +189,13 @@ script checks if the font is installed and else runs the command.
 org mode is very early in the config to ensure that org from the org
 elpa rather than melpa is loaded.
 
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
 
 (use-package org
   :ensure org ;;org-plus-contrib ;; currently seems broken
   :pin org ; only download orgmode from the org server
   :init
-  (setq org-agenda-files '("~/org/todo.org" "~/org/in.org" "~/org/projects.org")
+  (setq org-agenda-files '("~/org/") ;;'("~/org/todo.org" "~/org/in.org" "~/org/projects.org")
 	      org-catch-invisible-edits 'show
 	      org-confirm-babel-evaluate nil ;; run without confirmation
 	      org-src-preserve-indentation t ;; preserve indentation at export
@@ -311,18 +307,23 @@ elpa rather than melpa is loaded.
 *** Theme
 #+BEGIN_SRC emacs-lisp
 ;; Theme
-(use-package color-theme-solarized)
-(setq frame-background-mode 'light)
-;; (setq solarized-termcolors 256)
+(use-package doom-themes
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-solarized-light t)
 
-(set-face-attribute 'default nil :height 150 :family "Ubuntu Mono" :foreground "#657b83")
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
 
-(if (daemonp)
-(add-hook 'after-make-frame-functions
-          '(lambda (f)
-             (with-selected-frame f
-               (when (window-system f) (load-theme 'solarized t)))))
-(load-theme 'solarized t))
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config)
+
+  ;; set font
+  (set-face-attribute 'default nil :family "Ubuntu Mono" :height 150)
+  
+)
 
 ;; show linenumbers
 (global-linum-mode t)
@@ -358,9 +359,10 @@ elpa rather than melpa is loaded.
 (use-package beacon
    :config (beacon-mode +1))
 
-;; disable bell sound; but flash visual bell
+;; disable bell sound
 (setq ring-bell-function 'ignore
-       visible-bell 1)
+;;       visible-bell 1 ;; we already have the doom-theme bell setup
+)
 
 ;; nice scrolling
 (setq scroll-margin 0
@@ -416,7 +418,7 @@ Setup the ivy auto-complete package along with swiper
   ("M-s" . swiper-all)
   ("C-c C-r" . ivy-resume)
   ("C-c p" . counsel-git)
-  ("C-c g" . counsel-rg)
+  ("C-c r" . counsel-rg)
   ("C-x C-f" . counsel-find-file)
   (("M-y" . counsel-yank-pop)
   :map ivy-minibuffer-map
@@ -428,7 +430,7 @@ Setup the ivy auto-complete package along with swiper
 #+BEGIN_SRC emacs-lisp
 (use-package ripgrep
   :bind
-  ("C-c C-g" . ripgrep-regexp))
+  ("C-c C-r" . ripgrep-regexp))
 (use-package ag) ;; currently not used but frequently experimented with
 #+END_SRC
 
@@ -459,7 +461,8 @@ Setup the ivy auto-complete package along with swiper
   :init
   :diminish
   :bind
-  ("<f11>" . whitespace-mode))
+  ("<f11>" . whitespace-mode)
+  ("C-c w" . delete-trailing-whitespace))
 #+END_SRC
 
 *** comments
@@ -845,6 +848,7 @@ Copied from https://github.com/alhassy/emacs.d
   (setq elpy-rpc-backend "jedi")
   (add-hook 'elpy-mode-hook 'set-pyvenv))
 #+END_SRC
+
 
 *** pdf
 
