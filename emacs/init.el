@@ -847,5 +847,3 @@
 ;; Disable debugging
 (setq debug-on-error nil)
 (setq debug-on-quit nil)
-
-default
