@@ -142,6 +142,7 @@
         org-log-redeadline nil
         org-log-reschedule nil
         org-read-date-prefer-future 'time
+
         )
 
   :bind ("\C-ca" . org-agenda)
@@ -177,6 +178,11 @@
   "Refresh org-agenda."
   (org-agenda-refresh))
 
+  ;; enable python in org babel
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)))
+
   ;; Try to minimize org sync conflicts by autosaving (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
   (add-hook 'auto-save-hook 'org-save-all-org-buffers) ;; enable autosaves
   )
@@ -206,6 +212,8 @@
   :after org
   :config
   (org-super-agenda-mode))
+
+(use-package org-drill)
 
 (use-package org-noter
 :after org)
@@ -318,8 +326,9 @@
 ;; them. Here we set the set standard text width.
 
 (setq-default fill-column 70) ;; 70 fits nicly on half a 13'' macbook
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
-(add-hook 'org-mode-hook 'turn-on-auto-fill)
+;; auto-fill does interfers too often
+;; (add-hook 'text-mode-hook 'turn-on-auto-fill)
+;; (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
 ;; Counsel, Swiper and Ivy
 ;; Setup the ivy auto-complete package along with swiper
