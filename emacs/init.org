@@ -41,7 +41,7 @@ cd chemacs
 (("default" . ((user-emacs-directory . "~/dotfiles/emacs"))))
 #+END_SRC
 
-#+BEGIN_SRC :tangle ~/.emacs-profile
+#+BEGIN_SRC bash :tangle ~/.emacs-profile
 default
 #+END_SRC
 
