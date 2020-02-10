@@ -6,26 +6,27 @@
 (setq debug-on-error t)
 (setq debug-on-quit t)
 
+;; straight.el
+
+
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
 ;; Load ~use-package~
 
 
-;; the package manager
-(require 'package)
-(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("melpa" . "https://melpa.org/packages/")
-                         ("melpa-stable" . "https://stable.melpa.org/packages/"))
-      package-archive-priorities '(("melpa-stable" . 1)))
-;; package-check-signature 'nil) ;; neccesary if cert is broken again
-
-(package-initialize)
-
-;; load use-package
-(when (not package-archive-contents)
-  (package-refresh-contents) (package-install 'use-package))
-(require 'use-package)
-;; make sure that packages are installed
-(setq use-package-always-ensure t)
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
 
 ;; Garbage Collector
 ;; From https://github.com/MatthewZMD/.emacs.d:
@@ -94,16 +95,17 @@
 (use-package all-the-icons-dired
   :hook (dired-mode . all-the-icons-dired-mode))
 
-;; Auto-Update
+;; TODO Auto-Update
+;; needs to be set up with straight 
 
-(use-package auto-package-update
-  :config
-  ;; Delete residual old versions
-  (setq auto-package-update-delete-old-versions t)
-  ;; Do not bother me when updates have taken place.
-  (setq auto-package-update-hide-results t)
-  ;; Update installed packages at startup if there is an update pending.
-  (auto-package-update-maybe))
+;; (use-package auto-package-update
+;;   :config
+;;   ;; Delete residual old versions
+;;   (setq auto-package-update-delete-old-versions t)
+;;   ;; Do not bother me when updates have taken place.
+;;   (setq auto-package-update-hide-results t)
+;;   ;; Update installed packages at startup if there is an update pending.
+;;   (auto-package-update-maybe))
 
 ;; Personal Setup
 
@@ -121,15 +123,15 @@
 (defvar autosave-dir (expand-file-name "~/.emacs.d/autosave/"))
 
 ;; org mode
-;; org mode is very early in the config to ensure that org from the org
-;; elpa rather than melpa is loaded.
 
+
+;; ensure the corect org is used for everything
+(straight-use-package 'org-plus-contrib)
 
 (use-package org
-  :ensure org ;;org-plus-contrib ;; currently seems broken
-  :pin org ; only download orgmode from the org server
+  :straight org-plus-contrib
   :init
-  (setq org-agenda-files '("~/org/") ;;'("~/org/todo.org" "~/org/in.org" "~/org/projects.org")
+  (setq org-agenda-files '("~/org/")
 	      org-catch-invisible-edits 'show
 	      org-confirm-babel-evaluate nil ;; run without confirmation
 	      org-src-preserve-indentation t ;; preserve indentation at export
@@ -142,19 +144,12 @@
         org-log-redeadline nil
         org-log-reschedule nil
         org-read-date-prefer-future 'time
-
         )
 
   :bind ("\C-ca" . org-agenda)
   :config
 
   ;; Allow the :ignore: to ignore headers in exporing
-  ;; wait until org-plus is not broken
-  ;;(require 'ox-extra)
-  ;;(ox-extras-activate '(ignore-headlines))
-
-  ;; manual workaround
-  (add-to-list 'load-path "~/dotfiles/emacs/elpa/org-contrib/")
   (require 'ox-extra)
   (ox-extras-activate '(ignore-headlines))
 
@@ -184,7 +179,14 @@
    '((python . t)))
 
   ;; Try to minimize org sync conflicts by autosaving (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
-  (add-hook 'auto-save-hook 'org-save-all-org-buffers) ;; enable autosaves
+  ;; redefine org-save-all-org-buffers without print statements
+   (defun my-org-save-all-org-buffers ()
+     "Save all Org buffers without user confirmation."
+     (interactive)
+     (save-some-buffers t (lambda () (derived-mode-p 'org-mode)))
+     (when (featurep 'org-id) (org-id-locations-save)))
+
+   (add-hook 'auto-save-hook 'my-org-save-all-org-buffers) ;; enable autosaves
   )
 
 (defun org-toggle-link-display ()
@@ -213,14 +215,13 @@
   :config
   (org-super-agenda-mode))
 
-(use-package org-drill)
+;;(use-package org-drill)
 
 (use-package org-noter
 :after org)
 
 (use-package org-zotxt
-  :ensure zotxt
-  :pin melpa ;; use newest verions
+  :straight zotxt
   :diminish
   :after org
   :init (add-hook 'org-mode-hook #'org-zotxt-mode)
@@ -312,7 +313,6 @@
 
 
 (use-package doom-modeline
-      :ensure t
       :hook (after-init . doom-modeline-mode)
       :custom
       (inhibit-compacting-font-caches t)
@@ -447,7 +447,6 @@
 
 (use-package ispell
   :if (not (bound-and-true-p disable-pkg-ispell))
-  :ensure f
   :config
   (setq ispell-program-name "aspell")
   (setq ispell-extra-args   '("--sug-mode=ultra"
@@ -457,7 +456,6 @@
 (setq ispell-silently-savep t))
 
 (use-package flyspell
-  :ensure f
   :diminish
   :after ispell
   :init
@@ -528,7 +526,7 @@
 ;; Files
 
 (use-package dired
-  :ensure nil
+  :straight f
   :custom
   ;; Auto revert
   (auto-revert-use-notify nil)
@@ -763,7 +761,7 @@
 (use-package flymake)
 
 (use-package latex
-  :ensure auctex
+  :straight auctex
   :after flymake
   :config
   (setq auto-mode-alist (cons '("\\.tex$" . latex-mode) auto-mode-alist)
