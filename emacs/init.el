@@ -241,6 +241,32 @@
   (setq org-recur-finish-done t
         org-recur-finish-archive t))
 
+
+
+;; Display the emacs agenda every morning.
+;; The Agenda is opened if emacs is focused for the first time that day after 8 am.
+
+
+(setq my-open-agenda-every-day-last nil)
+(defun my-open-agenda-every-day ()
+  (interactive)
+  (let ((now (ts-now)))
+    (when (or (not my-open-agenda-every-day-last)
+              (and (ts>= now my-open-agenda-every-day-last)
+                   (>= (ts-hour now) 8)
+                   (or (> (ts-day now) (ts-day my-open-agenda-every-day-last))
+                       (> (ts-month now) (ts-month my-open-agenda-every-day-last))
+                       (> (ts-year now) (ts-year my-open-agenda-every-day-last)))))
+      (progn (org-agenda-list)
+             (switch-to-buffer "*Org Agenda*")
+             (delete-other-windows)
+             (setq my-open-agenda-every-day-last now))
+      )
+    )
+  )
+
+(add-hook 'focus-in-hook 'my-open-agenda-every-day)
+
 ;; Theme
 
 ;; Theme
@@ -848,6 +874,14 @@
       '("cpageref" TeX-arg-ref)
       '("Cpageref" TeX-arg-ref))))
   :diminish reftex-mode)
+
+;; Lua
+
+
+(use-package lua-mode
+  :mode (("\\.lua\\'" . lua-mode))
+  :config
+  (add-hook 'lua-mode-hook #'company-mode))
 
 ;; Disable debugging
 
