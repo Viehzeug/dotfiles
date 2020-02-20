@@ -813,12 +813,21 @@ Copied from https://github.com/alhassy/emacs.d
 (use-package ledger-mode)
 #+END_SRC
 
-
-
 *** git
 #+BEGIN_SRC emacs-lisp
 (use-package magit)
 #+END_SRC
+
+*** Markdown
+
+#+BEGIN_SRC emacs-lisp
+(use-package markdown-mode
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+#+END_SRC
+
 
 *** python
 #+BEGIN_SRC emacs-lisp
