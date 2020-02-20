@@ -122,125 +122,6 @@
 (defvar backup-dir (expand-file-name "~/.emacs.d/emacs_backup/"))
 (defvar autosave-dir (expand-file-name "~/.emacs.d/autosave/"))
 
-;; org mode
-
-
-;; ensure the corect org is used for everything
-(straight-use-package 'org-plus-contrib)
-
-(use-package org
-  :straight org-plus-contrib
-  :init
-  (setq org-agenda-files '("~/org/")
-	      org-catch-invisible-edits 'show
-	      org-confirm-babel-evaluate nil ;; run without confirmation
-	      org-src-preserve-indentation t ;; preserve indentation at export
-	      org-highlight-latex-and-related '(latex)
-
-        ;; Make org and org-recur work nicely
-        ;; Log time a task was set to Done.
-        org-log-done (quote time)
-        ;; Don't log the time a task was rescheduled or redeadlined.
-        org-log-redeadline nil
-        org-log-reschedule nil
-        org-read-date-prefer-future 'time
-        )
-
-  :bind ("\C-ca" . org-agenda)
-  :config
-
-  ;; Allow the :ignore: to ignore headers in exporing
-  (require 'ox-extra)
-  (ox-extras-activate '(ignore-headlines))
-
-  ;; refile setup
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 2)) ;; show two levels of headings
-        org-refile-allow-creating-parent-nodes 'confirm        ;; allow to create new nodes
-        org-refile-use-outline-path 'file                      ;; allow to file to top level of files
-        org-outline-path-complete-in-steps nil                 ;; present all possilbe paths at once
-  )
-
-  ;; make org play well with org reccur
-  ;; Refresh org-agenda after rescheduling a task.
-  (defun org-agenda-refresh ()
-    "Refresh all `org-agenda' buffers."
-    (dolist (buffer (buffer-list))
-      (with-current-buffer buffer
-        (when (derived-mode-p 'org-agenda-mode)
-          (org-agenda-maybe-redo)))))
-
-  (defadvice org-schedule (after refresh-agenda activate)
-  "Refresh org-agenda."
-  (org-agenda-refresh))
-
-  ;; enable python in org babel
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((python . t)))
-
-  ;; Try to minimize org sync conflicts by autosaving (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
-  ;; redefine org-save-all-org-buffers without print statements
-   (defun my-org-save-all-org-buffers ()
-     "Save all Org buffers without user confirmation."
-     (interactive)
-     (save-some-buffers t (lambda () (derived-mode-p 'org-mode)))
-     (when (featurep 'org-id) (org-id-locations-save)))
-
-   (add-hook 'auto-save-hook 'my-org-save-all-org-buffers) ;; enable autosaves
-  )
-
-(defun org-toggle-link-display ()
-  "Toggle the literal or descriptive display of links."
-  (interactive)
-  (if org-descriptive-links
-      (progn (org-remove-from-invisibility-spec '(org-link))
-         (org-restart-font-lock)
-         (setq org-descriptive-links nil))
-    (progn (add-to-invisibility-spec '(org-link))
-       (org-restart-font-lock)
-       (setq org-descriptive-links t))))
-
-(setq org-image-actual-width nil)
-
-(use-package org-noter
-    :after org
-    :config
-    (setq org-noter-always-create-frame nil
-          org-noter-insert-note-no-questions t
-          org-noter-separate-notes-from-heading t
-          org-noter-auto-save-last-location t))
-
-(use-package org-super-agenda
-  :after org
-  :config
-  (org-super-agenda-mode))
-
-;;(use-package org-drill)
-
-(use-package org-noter
-:after org)
-
-(use-package org-zotxt
-  :straight zotxt
-  :diminish
-  :after org
-  :init (add-hook 'org-mode-hook #'org-zotxt-mode)
-)
-
-(use-package org-recur
-  :hook ((org-mode . org-recur-mode)
-         (org-agenda-mode . org-recur-agenda-mode))
-  :demand t
-  :config
-  (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
-
-  ;; Rebind the 'd' key in org-agenda (default: `org-agenda-day-view').
-  (define-key org-recur-agenda-mode-map (kbd "d") 'org-recur-finish)
-  (define-key org-recur-agenda-mode-map (kbd "C-c d") 'org-recur-finish)
-
-  (setq org-recur-finish-done t
-        org-recur-finish-archive t))
-
 ;; Theme
 
 ;; Theme
@@ -689,6 +570,259 @@
 ;; Execute (undo-tree-visualize) then navigate along the tree to witness
 ;; changes being made to your file live!
 
+;; iedit, multiple cursors
+;; See:
+;; - https://emacs.stackexchange.com/questions/47821/iedit-vs-multiple-cursors
+
+
+(use-package iedit
+  :bind (("C-c i" . iedit-mode)))
+
+;; org mode
+
+
+;; ensure the correct org package is used for all the following
+(straight-use-package 'org-plus-contrib)
+
+;; org recur
+
+
+(defun marcfischer-init-org-recur-init()
+  (setq ;; Make org and org-recur work nicely
+        ;; Log time a task was set to Done.
+        org-log-done (quote time)
+        ;; Don't log the time a task was rescheduled or redeadlined.
+        org-log-redeadline nil
+        org-log-reschedule nil
+        org-read-date-prefer-future 'time
+        )
+)
+
+;; make org play well with org recur
+;; Refresh org-agenda after rescheduling a task.
+(defun marcfischer-init-org-agenda-refresh ()
+  "Refresh all `org-agenda' buffers."
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (derived-mode-p 'org-agenda-mode)
+        (org-agenda-maybe-redo)))))
+
+(defun marcfischer-init-org-recur-config ()
+  (defadvice org-schedule (after refresh-agenda activate)
+  "Refresh org-agenda."
+  (marcfischer-init-org-agenda-refresh))
+)
+
+(use-package org-recur
+:after org
+  :hook ((org-mode . org-recur-mode)
+         (org-agenda-mode . org-recur-agenda-mode))
+  :demand t
+  :init
+  (setq org-recur-finish-done t
+        org-recur-finish-archive t)
+  :config
+  (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
+  ;; Rebind the 'd' key in org-agenda (default: `org-agenda-day-view').
+  (define-key org-recur-agenda-mode-map (kbd "d") 'org-recur-finish)
+  (define-key org-recur-agenda-mode-map (kbd "C-c d") 'org-recur-finish))
+
+;; org refile
+
+
+(defun marcfischer-init-org-refile-config()
+  ;; refile setup
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 2)) ;; show two levels of headings
+        org-refile-allow-creating-parent-nodes 'confirm        ;; allow to create new nodes
+        org-refile-use-outline-path 'file                      ;; allow to file to top level of files
+        org-outline-path-complete-in-steps nil                 ;; present all possilbe paths at once
+        )
+)
+
+;; python
+;; [[https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html][[Documentation]​]]
+
+;; Use the following header arguments:
+;; - ~:results {output, value}~: Value mode is the default (as with other languages). In value mode you can use the following subtypes:
+;;   - ~raw~: value is inserted directly
+;;   - ~pp~: value is pretty-printed by python using pprint.pformat(%s), then inserted
+;;   - ~file~: value is interpreted as a filename to be interpolated when exporting; commonly used for graphics output.
+;; - ~:return~: Value to return (only when result-type is value, and not in session mode; not commonly used). Default is None; in non-session mode use return() to return a value.
+;; - ~:python~: Name of the command for executing Python code.
+;; - ~:session [name]~: default is no session.
+;; ~:var data=data-table~: Variables can be passed into python from org-mode tables as scalars or lists. See the org-mode manual for more details.
+;; ~:exports {code, results, both, none}~: Standard babel option for what to export.
+
+
+
+(defun marcfischer-init-org-babel-config()
+  ;; enable python in org babel
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)))
+)
+
+;; file sync
+
+
+;; Try to minimize org sync conflicts by autosaving (https://christiantietze.de/posts/2019/03/sync-emacs-org-files/)
+;; redefine org-save-all-org-buffers without print statements
+(defun marcfischer-init-org-save-all-org-buffers ()
+  "Save all Org buffers without user confirmation."
+  (interactive)
+  (save-some-buffers t (lambda () (derived-mode-p 'org-mode)))
+  (when (featurep 'org-id) (org-id-locations-save)))
+
+(defun marcfischer-init-org-sync-config ()
+  (add-hook 'auto-save-hook 'marcfischer-init-org-save-all-org-buffers) ;; enable autosaves
+)
+
+;; org noter
+
+(use-package org-noter
+    :after org
+    :config
+    (setq org-noter-always-create-frame nil
+          org-noter-insert-note-no-questions t
+          org-noter-separate-notes-from-heading t
+          org-noter-auto-save-last-location t))
+
+;; org super agenda
+
+(use-package org-super-agenda
+  :after org
+  :config
+  (org-super-agenda-mode))
+
+;; org zotxt
+
+(use-package org-zotxt
+  :straight zotxt
+  :diminish
+  :after org
+  :init (add-hook 'org-mode-hook 'org-zotxt-mode)
+)
+
+;; display agenda every morning
+
+;;   Display the emacs agenda every morning.
+;;   The Agenda is opened if emacs is focused for the first time that day after 8 am.
+
+
+(setq marcfischer-init-open-agenda-every-day-last nil)
+(defun marcfischer-init-open-agenda-every-day ()
+  (interactive)
+  (let ((now (ts-now)))
+    (when (or (not marcfischer-init-open-agenda-every-day-last)
+              (and (ts>= now marcfischer-init-open-agenda-every-day-last)
+                   (>= (ts-hour now) 8)
+                   (or (> (ts-day now) (ts-day marcfischer-init-open-agenda-every-day-last))
+                       (> (ts-month now) (ts-month marcfischer-init-open-agenda-every-day-last))
+                       (> (ts-year now) (ts-year marcfischer-init-open-agenda-every-day-last)))))
+      (progn (org-agenda-list)
+             (switch-to-buffer "*Org Agenda*")
+             (delete-other-windows)
+             (setq marcfischer-init-open-agenda-every-day-last now))
+      )
+    )
+  )
+
+(defun marcfischer-init-org-display-agenda-config ()
+  (add-hook 'focus-in-hook 'marcfischer-init-open-agenda-every-day) 
+)
+
+;; org capture
+
+;; See:
+;; - https://orgmode.org/manual/Capture-templates.html
+;; - https://cestlaz.github.io/posts/using-emacs-23-capture-1/
+;; - consider switching to https://github.com/progfolio/doct
+
+
+(defun marcfischer-init-org-capture-config()
+  (global-set-key (kbd "C-c c") 'org-capture)
+)
+
+(setq org-capture-templates
+'(("i" "in" entry (file "~/org/in.org") "* %?\n")
+("t" "todo" entry (file "~/org/in.org") "* TODO %?\n")
+))
+
+;; notes (org-journal; org-roam)
+
+;; See:
+;; - [[file:../../Dropbox/org/notes/20200216212922.org][How To Take Smart Notes With Org-mode]]
+;; - https://org-roam.readthedocs.io/en/develop/
+;; - https://github.com/bastibe/org-journal
+;; - https://blog.jethro.dev/posts/introducing_org_roam/
+
+
+(use-package org-journal
+  :after org
+  :defer t
+  :custom
+  (org-journal-dir "~/org/notes/")
+  (org-journal-date-format "%A, %d %B %Y"))
+
+(use-package org-roam
+      :after org
+      :hook 
+      ((org-mode . org-roam-mode)
+       (after-init . org-roam--build-cache-async) ;; optional!
+       )
+      :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
+      :custom
+      (org-roam-directory "~/org/notes")
+      :bind
+      ("C-c n l" . org-roam)
+      ("C-c n t" . org-roam-today)
+      ("C-c n f" . org-roam-find-file)
+      ("C-c n i" . org-roam-insert)
+      ("C-c n g" . org-roam-show-graph))
+
+;; other
+
+
+;; (defun org-toggle-link-display ()
+;;   "Toggle the literal or descriptive display of links."
+;;   (interactive)
+;;   (if org-descriptive-links
+;;       (progn (org-remove-from-invisibility-spec '(org-link))
+;;          (org-restart-font-lock)
+;;          (setq org-descriptive-links nil))
+;;     (progn (add-to-invisibility-spec '(org-link))
+;;        (org-restart-font-lock)
+;;        (setq org-descriptive-links t))))
+
+;; load everything
+
+
+(use-package org
+  :straight org-plus-contrib ;; load the full package with contrib code
+  :init
+  (setq org-agenda-files '("~/org/")
+	      org-catch-invisible-edits 'show
+	      org-confirm-babel-evaluate nil ;; run without confirmation
+	      org-src-preserve-indentation t ;; preserve indentation at export
+        org-image-actual-width nil
+	      org-highlight-latex-and-related '(latex))
+  (marcfischer-init-org-recur-init)
+
+  :bind ("\C-c a" . org-agenda)
+  :config
+
+  ;; Allow the :ignore: to ignore headers in exporing
+  (require 'ox-extra)
+  (ox-extras-activate '(ignore-headlines))
+
+  (marcfischer-init-org-recur-config)
+  (marcfischer-init-org-refile-config)
+  (marcfischer-init-org-babel-config)
+  (marcfischer-init-org-sync-config)
+  (marcfischer-init-org-display-agenda-config)
+  (marcfischer-init-org-capture-config)
+)
+
 ;; Ledger
 
 ;; ledger mode
@@ -848,6 +982,14 @@
       '("cpageref" TeX-arg-ref)
       '("Cpageref" TeX-arg-ref))))
   :diminish reftex-mode)
+
+;; Lua
+
+
+(use-package lua-mode
+  :mode (("\\.lua\\'" . lua-mode))
+  :config
+  (add-hook 'lua-mode-hook #'company-mode))
 
 ;; Disable debugging
 
