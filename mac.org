@@ -149,12 +149,8 @@ apps=(
 # Install apps to /Applications
 # Default is: /Users/$user/Applications
 echo "installing apps with Cask..."
-brew install caskroom/cask/brew-cask
-brew cask install --appdir="/Applications" ${apps[@]}
+brew install --cask --appdir="/Applications" ${apps[@]}
 
-brew cask alfred link
-
-brew cask cleanup
 brew cleanup
 #+end_src
 
