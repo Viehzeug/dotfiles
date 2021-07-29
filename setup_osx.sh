@@ -234,7 +234,17 @@ defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
 # Don’t automatically rearrange Spaces based on most recent use
 defaults write com.apple.dock mru-spaces -bool false
 
+# dock location
+defaults write com.apple.dock "orientation" -string "right"
+
+# make dock icons small
+defaults write com.apple.dock "tilesize" -int "36"
+
+# disable recents
+defaults write com.apple.dock "show-recents" -bool "false"
+
 echo "Cleaning up brew"
 brew cleanup
 killall Finder
+killall Dock
 echo "Done!"
