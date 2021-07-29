@@ -82,6 +82,12 @@ brew install emacs-mac --with-emacs-big-sur-icon --with-mac-metal --with-modules
 ln -s /usr/local/opt/emacs-mac/Emacs.app /Applications/Emacs.app
 #+end_src
 
+** Fonts
+#+begin_src sh :tangle setup_osx.sh
+brew tap homebrew/cask-fonts
+brew install font-ubuntu
+#+end_src
+
 ** Dotfiles
 #+begin_src sh :tangle setup_osx.sh
 echo "Copying dotfiles from Github"
@@ -297,4 +303,14 @@ brew cleanup
 killall Finder
 killall Dock
 echo "Done!"
+#+end_src
+
+* Doom Emcas
+
+
+#+begin_src sh :tangle setup_osx.sh
+git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
+ln -s /Users/marc/dotfiles/doom /Users/marc/.doom.d
+~/.emacs.d/bin/doom install
+~/.emacs.d/bin/doom sync
 #+end_src
