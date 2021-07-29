@@ -11,10 +11,10 @@ ln -s  $SRC_DIR"/.profile" $HOME"/.profile"
 
 
 # emacs
-git clone https://github.com/plexus/chemacs.git ~/chemacs
-cd ~/chemacs
-./install.sh
-ln -s  $SRC_DIR"/emacs/.emacs-profiles.el" $HOME"/.emacs-profiles.el"
-echo 'default' > ~/.emacs-profile
+#git clone https://github.com/plexus/chemacs.git ~/chemacs
+#jcd ~/chemacs
+#./install.sh
+#ln -s  $SRC_DIR"/emacs/.emacs-profiles.el" $HOME"/.emacs-profiles.el"
+#echo 'default' > ~/.emacs-profile
 
-wget https://raw.githubusercontent.com/rupa/z/master/z.sh -O ~/.z.sh
+#wget https://raw.githubusercontent.com/rupa/z/master/z.sh -O ~/.z.sh

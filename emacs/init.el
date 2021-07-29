@@ -6,6 +6,11 @@
 (setq debug-on-error t)
 (setq debug-on-quit t)
 
+;; show messages buffer
+(with-current-buffer (messages-buffer)
+  (goto-char (point-max))
+  (switch-to-buffer (current-buffer)))
+
 ;; straight.el
 
 
@@ -80,7 +85,7 @@
 (use-package f)
 (use-package dash)
 
- (use-package hydra)
+(use-package hydra)
 
 
 
@@ -449,15 +454,15 @@
 ;; Currently unused, but still here as dependency for some features (see
 ;; Python section).
 
-   (use-package projectile
-     :diminish
-     :config
-     (projectile-global-mode +1))
+(use-package projectile
+  :diminish
+  :config
+  (projectile-global-mode +1))
 
-   (use-package counsel-projectile
-     :diminish 
-     :config
-     (counsel-projectile-mode))
+(use-package counsel-projectile
+  :diminish 
+  :config
+  (counsel-projectile-mode))
 
 ;; Block movement of regions
 ;; Move code regions up and down with ~C-S-<up>~ and ~C-S-<down>~ (similar to Eclipse).
@@ -687,12 +692,30 @@
           org-noter-separate-notes-from-heading t
           org-noter-auto-save-last-location t))
 
-;; org super agenda
+;; setup org agenda
 
+(setq org-agenda-span 7 ;; show 7 days 
+      org-agenda-start-on-weekday nil  ;; start from current day (rather than monday)
+      org-agenda-start-day "-1d") ;; show 1 day beforet
+
+;; add super aggenda 
 (use-package org-super-agenda
   :after org
   :config
-  (org-super-agenda-mode))
+  (org-super-agenda-mode)
+
+(setq org-agenda-custom-commands
+      '(("c" "Super Agenda" agenda
+         (org-super-agenda-mode)
+         ((org-super-agenda-groups
+           '(
+             (:name "Today"
+                    :time-grid t
+                    :scheduled today)
+             (:name "Overdue"
+                    :scheduled past)
+             )))
+         (org-agenda nil "a")))))
 
 ;; org zotxt
 
@@ -703,32 +726,30 @@
   :init (add-hook 'org-mode-hook 'org-zotxt-mode)
 )
 
-;; display agenda every morning
-
-;;   Display the emacs agenda every morning.
-;;   The Agenda is opened if emacs is focused for the first time that day after 8 am.
+;; org-ref (with zotero integration)
 
 
-(setq marcfischer-init-open-agenda-every-day-last nil)
-(defun marcfischer-init-open-agenda-every-day ()
+;; zotero pdf support
+;; https://github.com/jkitchin/org-ref/blob/4f26ac56db785b4bff05e75ae7decc44be2ba89e/org-ref.org
+(defun my/org-ref-open-pdf-at-point ()
+  "Open the pdf for bibtex key under point if it exists."
   (interactive)
-  (let ((now (ts-now)))
-    (when (or (not marcfischer-init-open-agenda-every-day-last)
-              (and (ts>= now marcfischer-init-open-agenda-every-day-last)
-                   (>= (ts-hour now) 8)
-                   (or (> (ts-day now) (ts-day marcfischer-init-open-agenda-every-day-last))
-                       (> (ts-month now) (ts-month marcfischer-init-open-agenda-every-day-last))
-                       (> (ts-year now) (ts-year marcfischer-init-open-agenda-every-day-last)))))
-      (progn (org-agenda-list)
-             (switch-to-buffer "*Org Agenda*")
-             (delete-other-windows)
-             (setq marcfischer-init-open-agenda-every-day-last now))
-      )
-    )
-  )
+  (let* ((results (org-ref-get-bibtex-key-and-file))
+         (key (car results))
+	 (pdf-file (car (bibtex-completion-find-pdf key))))
+    (if (file-exists-p pdf-file)
+	(org-open-file pdf-file)
+      (message "No PDF found for %s" key))))
 
-(defun marcfischer-init-org-display-agenda-config ()
-  (add-hook 'focus-in-hook 'marcfischer-init-open-agenda-every-day) 
+(use-package org-ref
+  :after org
+  :config
+  (setq reftex-default-bibliography '("~/org/bibliography/zotero.bib")
+  org-ref-bibliography-notes "~/org/bibliography/notes.org"
+  org-ref-default-bibliography '("~/org/bibliography/zotero.bib")
+  org-ref-pdf-directory "~/org/bibliography/pdfs/"
+  org-ref-open-pdf-function 'my/org-ref-open-pdf-at-point
+  org-ref-completion-library 'org-ref-ivy-cite)
 )
 
 ;; org capture
@@ -745,7 +766,13 @@
 
 (setq org-capture-templates
 '(("i" "in" entry (file "~/org/in.org") "* %?\n")
-("t" "todo" entry (file "~/org/in.org") "* TODO %?\n")
+("t" "todo" entry (file "~/org/in.org") "* TODO %? %^g \n SCHEDULED: %^t \n")
+("c" "cooking" entry (file "~/org/cooking.org") "* %?\n")
+("r" "reading" entry (file "~/org/read.org") "* %?\n")
+("m" "media [music, games, movies, recreational books] to consider" entry (file+headline "~/org/media.org" "To check out") "** %? %^g\n")
+("o" "quote" entry (file "~/org/quotes.org") "* %^{quote}\n:PROPERTIES:\n:BY: %^{by}\n:FROM: %^{from}\n:END:" :empty-lines 1)
+
+
 ))
 
 ;; notes (org-journal; org-roam)
@@ -770,7 +797,7 @@
       ((org-mode . org-roam-mode)
        (after-init . org-roam--build-cache-async) ;; optional!
        )
-      :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
+      :straight (:host github :repo "jethrokuan/org-roam" :branch "master")
       :custom
       (org-roam-directory "~/org/notes")
       :bind
@@ -805,6 +832,7 @@
 	      org-confirm-babel-evaluate nil ;; run without confirmation
 	      org-src-preserve-indentation t ;; preserve indentation at export
         org-image-actual-width nil
+        org-agenda-window-setup 'only-window ;; make sure that agenda uses fullscreen
 	      org-highlight-latex-and-related '(latex))
   (marcfischer-init-org-recur-init)
 
@@ -814,13 +842,21 @@
   ;; Allow the :ignore: to ignore headers in exporing
   (require 'ox-extra)
   (ox-extras-activate '(ignore-headlines))
-
   (marcfischer-init-org-recur-config)
   (marcfischer-init-org-refile-config)
   (marcfischer-init-org-babel-config)
   (marcfischer-init-org-sync-config)
-  (marcfischer-init-org-display-agenda-config)
+  ;;(marcfischer-init-org-display-agenda-config)
   (marcfischer-init-org-capture-config)
+)
+
+;; Integrate org-bibtex with org-roam (org-roam-bibtex)
+
+(use-package org-roam-bibtex
+:after (org-roam org-ref)
+:hook (org-roam-mode . org-roam-bibtex-mode)
+:bind (:map org-mode-map
+       (("C-c n a" . orb-note-actions)))
 )
 
 ;; Ledger
@@ -831,6 +867,39 @@
 ;; git
 
 (use-package magit)
+
+;; C++
+
+
+;; also use c++ mode for cuda files
+(add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
+
+;; Eglot
+
+
+(use-package eglot
+  :diminish t
+  :hook
+  ;;(c-mode . eglot-ensure)
+  ;;(c++-mode . eglot-ensure)
+  (js-mode . eglot-ensure)
+  (jsx-mode . eglot-ensure)
+  (js-mode . eglot-ensure)
+  (typescript-mode . eglot-ensure)
+    ;;(python-mode . eglot-ensure)
+)
+
+;; Typescript
+
+
+(use-package typescript-mode
+  :diminish t)
+
+;; SCSS
+
+
+(use-package scss-mode
+  :diminish t)
 
 ;; python
 
@@ -991,8 +1060,22 @@
   :config
   (add-hook 'lua-mode-hook #'company-mode))
 
+;; Markdown
+
+
+(use-package markdown-mode
+  :ensure t
+  :mode ("\\.md\\'" . gfm-mode)
+  :commands (markdown-mode gfm-mode)
+  :config
+  (setq markdown-command "pandoc -t html5")t)
+
 ;; Disable debugging
 
 ;; Disable debugging
 (setq debug-on-error nil)
 (setq debug-on-quit nil)
+
+;; Say we are Done
+
+(message "init done")

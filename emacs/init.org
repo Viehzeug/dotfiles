@@ -72,6 +72,11 @@ Run with debugging enabled during ~init.el~. We disable it at the end.
 ;; only debug during init; disabled at end.
 (setq debug-on-error t)
 (setq debug-on-quit t)
+
+;; show messages buffer
+(with-current-buffer (messages-buffer)
+  (goto-char (point-max))
+  (switch-to-buffer (current-buffer)))
 #+END_SRC
 
 *** straight.el
@@ -199,6 +204,30 @@ needs to be set up with straight
 
 
 
+*** modeline
+
+#+BEGIN_SRC emacs-lisp
+(use-package doom-modeline
+      :hook (after-init . doom-modeline-mode)
+      :custom
+      (inhibit-compacting-font-caches t)
+      (doom-modeline-minor-modes t)
+      (doom-modeline-icon t)
+      (doom-modeline-major-mode-color-icon t)
+      (doom-modeline-height 15))
+#+END_SRC
+
+
+*** Text width (Fill-mode)
+~M-q~ (~fill-paragraph~) justifies paragraphs and automatically breaks
+them. Here we set the set standard text width.
+#+BEGIN_SRC emacs-lisp
+(setq-default fill-column 70) ;; 70 fits nicly on half a 13'' macbook
+;; auto-fill does interfers too often
+;; (add-hook 'text-mode-hook 'turn-on-auto-fill)
+;; (add-hook 'org-mode-hook 'turn-on-auto-fill)
+#+END_SRC
+
 *** Theme
 #+BEGIN_SRC emacs-lisp
 ;; Theme
@@ -217,7 +246,7 @@ needs to be set up with straight
 
   ;; set font
   (set-face-attribute 'default nil :family "Ubuntu Mono" :height 150)
-  
+
 )
 
 ;; show linenumbers
@@ -266,30 +295,6 @@ needs to be set up with straight
 
 ;; enable y/n answers
 (fset 'yes-or-no-p 'y-or-n-p)
-#+END_SRC
-
-*** modeline
-
-#+BEGIN_SRC emacs-lisp
-(use-package doom-modeline
-      :hook (after-init . doom-modeline-mode)
-      :custom
-      (inhibit-compacting-font-caches t)
-      (doom-modeline-minor-modes t)
-      (doom-modeline-icon t)
-      (doom-modeline-major-mode-color-icon t)
-      (doom-modeline-height 15))
-#+END_SRC
-
-
-*** Text width (Fill-mode)
-~M-q~ (~fill-paragraph~) justifies paragraphs and automatically breaks
-them. Here we set the set standard text width.
-#+BEGIN_SRC emacs-lisp
-(setq-default fill-column 70) ;; 70 fits nicly on half a 13'' macbook
-;; auto-fill does interfers too often
-;; (add-hook 'text-mode-hook 'turn-on-auto-fill)
-;; (add-hook 'org-mode-hook 'turn-on-auto-fill)
 #+END_SRC
 
 *** Counsel, Swiper and Ivy
@@ -806,13 +811,36 @@ Use the following header arguments:
           org-noter-auto-save-last-location t))
 #+END_SRC
 
-**** org super agenda
+
+**** setup org agenda
 #+BEGIN_SRC emacs-lisp
+
+(setq org-agenda-span 7 ;; show 7 days 
+      org-agenda-start-on-weekday nil  ;; start from current day (rather than monday)
+      org-agenda-start-day "-1d") ;; show 1 day beforet
+
+;; add super aggenda 
 (use-package org-super-agenda
   :after org
   :config
-  (org-super-agenda-mode))
+  (org-super-agenda-mode)
+
+(setq org-agenda-custom-commands
+      '(("c" "Super Agenda" agenda
+         (org-super-agenda-mode)
+         ((org-super-agenda-groups
+           '(
+             (:name "Today"
+                    :time-grid t
+                    :scheduled today)
+             (:name "Overdue"
+                    :scheduled past)
+             )))
+         (org-agenda nil "a")))))
 #+END_SRC
+
+#+RESULTS:
+: t
 
 **** org zotxt
 #+BEGIN_SRC emacs-lisp
@@ -824,34 +852,64 @@ Use the following header arguments:
 )
 #+END_SRC
 
-**** display agenda every morning
 
-  Display the emacs agenda every morning.
-  The Agenda is opened if emacs is focused for the first time that day after 8 am.
+**** org-ref (with zotero integration)
 
-  #+BEGIN_SRC emacs-lisp
-(setq marcfischer-init-open-agenda-every-day-last nil)
-(defun marcfischer-init-open-agenda-every-day ()
+#+BEGIN_SRC emacs-lisp
+
+;; zotero pdf support
+;; https://github.com/jkitchin/org-ref/blob/4f26ac56db785b4bff05e75ae7decc44be2ba89e/org-ref.org
+(defun my/org-ref-open-pdf-at-point ()
+  "Open the pdf for bibtex key under point if it exists."
   (interactive)
-  (let ((now (ts-now)))
-    (when (or (not marcfischer-init-open-agenda-every-day-last)
-              (and (ts>= now marcfischer-init-open-agenda-every-day-last)
-                   (>= (ts-hour now) 8)
-                   (or (> (ts-day now) (ts-day marcfischer-init-open-agenda-every-day-last))
-                       (> (ts-month now) (ts-month marcfischer-init-open-agenda-every-day-last))
-                       (> (ts-year now) (ts-year marcfischer-init-open-agenda-every-day-last)))))
-      (progn (org-agenda-list)
-             (switch-to-buffer "*Org Agenda*")
-             (delete-other-windows)
-             (setq marcfischer-init-open-agenda-every-day-last now))
-      )
-    )
-  )
+  (let* ((results (org-ref-get-bibtex-key-and-file))
+         (key (car results))
+	 (pdf-file (car (bibtex-completion-find-pdf key))))
+    (if (file-exists-p pdf-file)
+	(org-open-file pdf-file)
+      (message "No PDF found for %s" key))))
 
-(defun marcfischer-init-org-display-agenda-config ()
-  (add-hook 'focus-in-hook 'marcfischer-init-open-agenda-every-day) 
+(use-package org-ref
+  :after org
+  :config
+  (setq reftex-default-bibliography '("~/org/bibliography/zotero.bib")
+  org-ref-bibliography-notes "~/org/bibliography/notes.org"
+  org-ref-default-bibliography '("~/org/bibliography/zotero.bib")
+  org-ref-pdf-directory "~/org/bibliography/pdfs/"
+  org-ref-open-pdf-function 'my/org-ref-open-pdf-at-point
+  org-ref-completion-library 'org-ref-ivy-cite)
 )
-  #+END_SRC
+
+#+END_SRC
+
+# **** display agenda every morning
+
+#   Display the emacs agenda every morning.
+#   The Agenda is opened if emacs is focused for the first time that day after 8 am.
+
+#   #+BEGIN_SRC emacs-lisp
+# (setq marcfischer-init-open-agenda-every-day-last nil)
+# (defun marcfischer-init-open-agenda-every-day ()
+#   (interactive)
+#   (let ((now (ts-now)))
+#     (when (or (not marcfischer-init-open-agenda-every-day-last)
+#               (and (ts>= now marcfischer-init-open-agenda-every-day-last)
+#                    (>= (ts-hour now) 7)
+#                    (or (> (ts-day now) (ts-day marcfischer-init-open-agenda-every-day-last))
+#                        (> (ts-month now) (ts-month marcfischer-init-open-agenda-every-day-last))
+#                        (> (ts-year now) (ts-year marcfischer-init-open-agenda-every-day-last)))))
+#       (progn (org-agenda-list)
+#              (switch-to-buffer "*Org Agenda*")
+#              (delete-other-windows)
+#              (setq marcfischer-init-open-agenda-every-day-last now))
+#       )
+#     )
+#   )
+
+# (defun marcfischer-init-org-display-agenda-config ()
+#   (add-hook 'focus-in-hook 'marcfischer-init-open-agenda-every-day) 
+# )
+#   #+END_SRC
 
 
 **** org capture
@@ -868,9 +926,19 @@ See:
 
 (setq org-capture-templates
 '(("i" "in" entry (file "~/org/in.org") "* %?\n")
-("t" "todo" entry (file "~/org/in.org") "* TODO %?\n")
+("t" "todo" entry (file "~/org/in.org") "* TODO %? %^g \n SCHEDULED: %^t \n")
+("c" "cooking" entry (file "~/org/cooking.org") "* %?\n")
+("r" "reading" entry (file "~/org/read.org") "* %?\n")
+("m" "media [music, games, movies, recreational books] to consider" entry (file+headline "~/org/media.org" "To check out") "** %? %^g\n")
+("o" "quote" entry (file "~/org/quotes.org") "* %^{quote}\n:PROPERTIES:\n:BY: %^{by}\n:FROM: %^{from}\n:END:" :empty-lines 1)
+
+
 ))
 #+END_SRC
+
+#+RESULTS:
+| i | in   | entry | (file ~/org/in.org) | * %?          |
+| t | todo | entry | (file ~/org/in.org) | * TODO %? %^g |
 
 **** notes (org-journal; org-roam)
 
@@ -894,7 +962,7 @@ See:
       ((org-mode . org-roam-mode)
        (after-init . org-roam--build-cache-async) ;; optional!
        )
-      :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
+      :straight (:host github :repo "jethrokuan/org-roam" :branch "master")
       :custom
       (org-roam-directory "~/org/notes")
       :bind
@@ -933,6 +1001,7 @@ See:
 	      org-confirm-babel-evaluate nil ;; run without confirmation
 	      org-src-preserve-indentation t ;; preserve indentation at export
         org-image-actual-width nil
+        org-agenda-window-setup 'only-window ;; make sure that agenda uses fullscreen
 	      org-highlight-latex-and-related '(latex))
   (marcfischer-init-org-recur-init)
 
@@ -942,17 +1011,28 @@ See:
   ;; Allow the :ignore: to ignore headers in exporing
   (require 'ox-extra)
   (ox-extras-activate '(ignore-headlines))
-
   (marcfischer-init-org-recur-config)
   (marcfischer-init-org-refile-config)
   (marcfischer-init-org-babel-config)
   (marcfischer-init-org-sync-config)
-  (marcfischer-init-org-display-agenda-config)
+  ;;(marcfischer-init-org-display-agenda-config)
   (marcfischer-init-org-capture-config)
 )
   #+END_SRC
 
+  #+RESULTS:
+  : org-agenda
 
+
+*** Integrate org-bibtex with org-roam (org-roam-bibtex)
+#+BEGIN_SRC emacs-lisp
+    (use-package org-roam-bibtex
+  :after (org-roam org-ref)
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :bind (:map org-mode-map
+         (("C-c n a" . orb-note-actions)))
+  )
+#+END_SRC
 
 
 *** Ledger
@@ -966,6 +1046,46 @@ See:
 *** git
 #+BEGIN_SRC emacs-lisp
 (use-package magit)
+#+END_SRC
+
+*** C++
+
+#+BEGIN_SRC emacs-lisp
+;; also use c++ mode for cuda files
+(add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
+#+END_SRC
+
+
+*** Eglot
+
+#+BEGIN_SRC emacs-lisp
+(use-package eglot
+  :diminish t
+  :hook
+  ;;(c-mode . eglot-ensure)
+  ;;(c++-mode . eglot-ensure)
+  (js-mode . eglot-ensure)
+  (jsx-mode . eglot-ensure)
+  (js-mode . eglot-ensure)
+  (typescript-mode . eglot-ensure)
+    ;;(python-mode . eglot-ensure)
+)
+#+END_SRC
+
+**** TODO unify with python
+
+*** Typescript
+
+#+BEGIN_SRC emacs-lisp
+  (use-package typescript-mode
+    :diminish t)
+#+END_SRC
+
+*** SCSS
+
+#+BEGIN_SRC emacs-lisp
+  (use-package scss-mode
+    :diminish t)
 #+END_SRC
 
 *** python
@@ -1134,6 +1254,19 @@ Disable line numbers when in pdf mode.
   (add-hook 'lua-mode-hook #'company-mode))
 #+END_SRC
 
+*** Markdown
+
+#+BEGIN_SRC emacs-lisp
+(use-package markdown-mode
+  :ensure t
+  :mode ("\\.md\\'" . gfm-mode)
+  :commands (markdown-mode gfm-mode)
+  :config
+  (setq markdown-command "pandoc -t html5")t)
+#+END_SRC
+
+#+RESULTS:
+: ((\.md\' . gfm-mode) (\.\(?:md\|markdown\|mkd\|mdown\|mkdn\|mdwn\)\' . markdown-mode) (\.tex$ . latex-mode) (\.lua\' . lua-mode) (\.tex$ . latex-mode) (\.hva\' . latex-mode) (\.drv\' . latex-mode) (\.[pP][dD][fF]\' . pdf-view-mode) (\.ts$ . typescript-mode) (\.cu\' . c++-mode) (/git-rebase-todo\' . git-rebase-mode) (\.odc\' . archive-mode) (\.odf\' . archive-mode) (\.odi\' . archive-mode) (\.otp\' . archive-mode) (\.odp\' . archive-mode) (\.otg\' . archive-mode) (\.odg\' . archive-mode) (\.ots\' . archive-mode) (\.ods\' . archive-mode) (\.odm\' . archive-mode) (\.ott\' . archive-mode) (\.odt\' . archive-mode) (\.ledger\' . ledger-mode) (\.gpg\(~\|\.~[0-9]+~\)?\' nil epa-file) (\.\(?:3fr\|a\(?:rw\|vs\)\|bmp[23]?\|c\(?:als?\|myka?\|r[2w]\|u[rt]\)\|d\(?:c[mrx]\|ds\|ng\|px\)\|exr\|f\(?:ax\|its\)\|gif\(?:87\)?\|hrz\|ic\(?:on\|[bo]\)\|j\(?:2c\|ng\|p\(?:eg\|[2cg]\)\)\|k\(?:25\|dc\)\|m\(?:iff\|ng\|rw\|s\(?:l\|vg\)\|tv\)\|nef\|o\(?:rf\|tb\)\|p\(?:bm\|c\(?:ds\|[dltx]\)\|db\|ef\|gm\|i\(?:ct\|x\)\|jpeg\|n\(?:g\(?:24\|32\|8\)\|[gm]\)\|pm\|sd\|tif\|wp\)\|r\(?:a[fs]\|gb[ao]?\|l[ae]\)\|s\(?:c[rt]\|fw\|gi\|r[2f]\|un\|vgz?\)\|t\(?:ga\|i\(?:ff\(?:64\)?\|le\|m\)\|tf\)\|uyvy\|v\(?:da\|i\(?:car\|d\|ff\)\|st\)\|w\(?:bmp\|pg\)\|x\(?:3f\|bm\|cf\|pm\|[cv]\)\|y\(?:cbcra?\|uv\)\)\' . image-mode) (\.elc\' . elisp-byte-code-mode) (\.zst\' nil jka-compr) (\.dz\' nil jka-compr) (\.xz\' nil jka-compr) (\.lzma\' nil jka-compr) (\.lz\' nil jka-compr) (\.g?z\' nil jka-compr) (\.bz2\' nil jka-compr) (\.Z\' nil jka-compr) (\.vr[hi]?\' . vera-mode) (\(?:\.\(?:rbw?\|ru\|rake\|thor\|jbuilder\|rabl\|gemspec\|podspec\)\|/\(?:Gem\|Rake\|Cap\|Thor\|Puppet\|Berks\|Vagrant\|Guard\|Pod\)file\)\' . ruby-mode) (\.re?st\' . rst-mode) (\.py[iw]?\' . python-mode) (\.m\' . octave-maybe-mode) (\.less\' . less-css-mode) (\.scss\' . scss-mode) (\.awk\' . awk-mode) (\.\(u?lpc\|pike\|pmod\(\.in\)?\)\' . pike-mode) (\.idl\' . idl-mode) (\.java\' . java-mode) (\.m\' . objc-mode) (\.ii\' . c++-mode) (\.i\' . c-mode) (\.lex\' . c-mode) (\.y\(acc\)?\' . c-mode) (\.h\' . c-or-c++-mode) (\.c\' . c-mode) (\.\(CC?\|HH?\)\' . c++-mode) (\.[ch]\(pp\|xx\|\+\+\)\' . c++-mode) (\.\(cc\|hh\)\' . c++-mode) (\.\(bat\|cmd\)\' . bat-mode) (\.[sx]?html?\(\.[a-zA-Z_]+\)?\' . mhtml-mode) (\.svgz?\' . image-mode) (\.svgz?\' . xml-mode) (\.x[bp]m\' . image-mode) (\.x[bp]m\' . c-mode) (\.p[bpgn]m\' . image-mode) (\.tiff?\' . image-mode) (\.gif\' . image-mode) (\.png\' . image-mode) (\.jpe?g\' . image-mode) (\.te?xt\' . text-mode) (\.[tT]e[xX]\' . tex-mode) (\.ins\' . tex-mode) (\.ltx\' . latex-mode) (\.dtx\' . doctex-mode) (\.org\' . org-mode) (\.el\' . emacs-lisp-mode) (Project\.ede\' . emacs-lisp-mode) (\.\(scm\|stk\|ss\|sch\)\' . scheme-mode) (\.l\' . lisp-mode) (\.li?sp\' . lisp-mode) (\.[fF]\' . fortran-mode) (\.for\' . fortran-mode) (\.p\' . pascal-mode) (\.pas\' . pascal-mode) (\.\(dpr\|DPR\)\' . delphi-mode) (\.ad[abs]\' . ada-mode) (\.ad[bs]\.dg\' . ada-mode) (\.\([pP]\([Llm]\|erl\|od\)\|al\)\' . perl-mode) (Imakefile\' . makefile-imake-mode) (Makeppfile\(?:\.mk\)?\' . makefile-makepp-mode) (\.makepp\' . makefile-makepp-mode) (\.mk\' . makefile-bsdmake-mode) (\.make\' . makefile-bsdmake-mode) (GNUmakefile\' . makefile-gmake-mode) ([Mm]akefile\' . makefile-bsdmake-mode) (\.am\' . makefile-automake-mode) (\.texinfo\' . texinfo-mode) (\.te?xi\' . texinfo-mode) (\.[sS]\' . asm-mode) (\.asm\' . asm-mode) (\.css\' . css-mode) (\.mixal\' . mixal-mode) (\.gcov\' . compilation-mode) (/\.[a-z0-9-]*gdbinit . gdb-script-mode) (-gdb\.gdb . gdb-script-mode) ([cC]hange\.?[lL]og?\' . change-log-mode) ([cC]hange[lL]og[-.][0-9]+\' . change-log-mode) (\$CHANGE_LOG\$\.TXT . change-log-mode) (\.scm\.[0-9]*\' . scheme-mode) (\.[ckz]?sh\'\|\.shar\'\|/\.z?profile\' . sh-mode) (\.bash\' . sh-mode) (\(/\|\`\)\.\(bash_\(profile\|history\|log\(in\|out\)\)\|z?log\(in\|out\)\)\' . sh-mode) (\(/\|\`\)\.\(shrc\|zshrc\|m?kshrc\|bashrc\|t?cshrc\|esrc\)\' . sh-mode) (\(/\|\`\)\.\([kz]shenv\|xinitrc\|startxrc\|xsession\)\' . sh-mode) (\.m?spec\' . sh-mode) (\.m[mes]\' . nroff-mode) (\.man\' . nroff-mode) (\.sty\' . latex-mode) (\.cl[so]\' . latex-mode) (\.bbl\' . latex-mode) (\.bib\' . bibtex-mode) (\.bst\' . bibtex-style-mode) (\.sql\' . sql-mode) (\(acinclude\|aclocal\|acsite\)\.m4\' . autoconf-mode) (\.m[4c]\' . m4-mode) (\.mf\' . metafont-mode) (\.mp\' . metapost-mode) (\.vhdl?\' . vhdl-mode) (\.article\' . text-mode) (\.letter\' . text-mode) (\.i?tcl\' . tcl-mode) (\.exp\' . tcl-mode) (\.itk\' . tcl-mode) (\.icn\' . icon-mode) (\.sim\' . simula-mode) (\.mss\' . scribe-mode) (\.f9[05]\' . f90-mode) (\.f0[38]\' . f90-mode) (\.indent\.pro\' . fundamental-mode) (\.\(pro\|PRO\)\' . idlwave-mode) (\.srt\' . srecode-template-mode) (\.prolog\' . prolog-mode) (\.tar\' . tar-mode) (\.\(arc\|zip\|lzh\|lha\|zoo\|[jew]ar\|xpi\|rar\|cbr\|7z\|ARC\|ZIP\|LZH\|LHA\|ZOO\|[JEW]AR\|XPI\|RAR\|CBR\|7Z\)\' . archive-mode) (\.oxt\' . archive-mode) (\.\(deb\|[oi]pk\)\' . archive-mode) (\`/tmp/Re . text-mode) (/Message[0-9]*\' . text-mode) (\`/tmp/fol/ . text-mode) (\.oak\' . scheme-mode) (\.sgml?\' . sgml-mode) (\.x[ms]l\' . xml-mode) (\.dbk\' . xml-mode) (\.dtd\' . sgml-mode) (\.ds\(ss\)?l\' . dsssl-mode) (\.js[mx]?\' . javascript-mode) (\.har\' . javascript-mode) (\.json\' . javascript-mode) (\.[ds]?va?h?\' . verilog-mode) (\.by\' . bovine-grammar-mode) (\.wy\' . wisent-grammar-mode) ([:/\]\..*\(emacs\|gnus\|viper\)\' . emacs-lisp-mode) (\`\..*emacs\' . emacs-lisp-mode) ([:/]_emacs\' . emacs-lisp-mode) (/crontab\.X*[0-9]+\' . shell-script-mode) (\.ml\' . lisp-mode) (\.ld[si]?\' . ld-script-mode) (ld\.?script\' . ld-script-mode) (\.xs\' . c-mode) (\.x[abdsru]?[cnw]?\' . ld-script-mode) (\.zone\' . dns-mode) (\.soa\' . dns-mode) (\.asd\' . lisp-mode) (\.\(asn\|mib\|smi\)\' . snmp-mode) (\.\(as\|mi\|sm\)2\' . snmpv2-mode) (\.\(diffs?\|patch\|rej\)\' . diff-mode) (\.\(dif\|pat\)\' . diff-mode) (\.[eE]?[pP][sS]\' . ps-mode) (\.\(?:PDF\|DVI\|OD[FGPST]\|DOCX\|XLSX?\|PPTX?\|pdf\|djvu\|dvi\|od[fgpst]\|docx\|xlsx?\|pptx?\)\' . doc-view-mode-maybe) (configure\.\(ac\|in\)\' . autoconf-mode) (\.s\(v\|iv\|ieve\)\' . sieve-mode) (BROWSE\' . ebrowse-tree-mode) (\.ebrowse\' . ebrowse-tree-mode) (#\*mail\* . mail-mode) (\.g\' . antlr-mode) (\.mod\' . m2-mode) (\.ses\' . ses-mode) (\.docbook\' . sgml-mode) (\.com\' . dcl-mode) (/config\.\(?:bat\|log\)\' . fundamental-mode) (/\.\(authinfo\|netrc\)\' . authinfo-mode) (\.\(?:[iI][nN][iI]\|[lL][sS][tT]\|[rR][eE][gG]\|[sS][yY][sS]\)\' . conf-mode) (\.la\' . conf-unix-mode) (\.ppd\' . conf-ppd-mode) (java.+\.conf\' . conf-javaprop-mode) (\.properties\(?:\.[a-zA-Z0-9._-]+\)?\' . conf-javaprop-mode) (\.toml\' . conf-toml-mode) (\.desktop\' . conf-desktop-mode) (/\.redshift\.conf\' . conf-windows-mode) (\`/etc/\(?:DIR_COLORS\|ethers\|.?fstab\|.*hosts\|lesskey\|login\.?de\(?:fs\|vperm\)\|magic\|mtab\|pam\.d/.*\|permissions\(?:\.d/.+\)?\|protocols\|rpc\|services\)\' . conf-space-mode) (\`/etc/\(?:acpid?/.+\|aliases\(?:\.d/.+\)?\|default/.+\|group-?\|hosts\..+\|inittab\|ksysguarddrc\|opera6rc\|passwd-?\|shadow-?\|sysconfig/.+\)\' . conf-mode) ([cC]hange[lL]og[-.][-0-9a-z]+\' . change-log-mode) (/\.?\(?:gitconfig\|gnokiirc\|hgrc\|kde.*rc\|mime\.types\|wgetrc\)\' . conf-mode) (/\.\(?:asound\|enigma\|fetchmail\|gltron\|gtk\|hxplayer\|mairix\|mbsync\|msmtp\|net\|neverball\|nvidia-settings-\|offlineimap\|qt/.+\|realplayer\|reportbug\|rtorrent\.\|screen\|scummvm\|sversion\|sylpheed/.+\|xmp\)rc\' . conf-mode) (/\.\(?:gdbtkinit\|grip\|mpdconf\|notmuch-config\|orbital/.+txt\|rhosts\|tuxracer/options\)\' . conf-mode) (/\.?X\(?:default\|resource\|re\)s\> . conf-xdefaults-mode) (/X11.+app-defaults/\|\.ad\' . conf-xdefaults-mode) (/X11.+locale/.+/Compose\' . conf-colon-mode) (/X11.+locale/compose\.dir\' . conf-javaprop-mode) (\.~?[0-9]+\.[0-9][-.0-9]*~?\' nil t) (\.\(?:orig\|in\|[bB][aA][kK]\)\' nil t) ([/.]c\(?:on\)?f\(?:i?g\)?\(?:\.[a-zA-Z0-9._-]+\)?\' . conf-mode-maybe) (\.[1-9]\' . nroff-mode) (\.art\' . image-mode) (\.avs\' . image-mode) (\.bmp\' . image-mode) (\.cmyk\' . image-mode) (\.cmyka\' . image-mode) (\.crw\' . image-mode) (\.dcr\' . image-mode) (\.dcx\' . image-mode) (\.dng\' . image-mode) (\.dpx\' . image-mode) (\.fax\' . image-mode) (\.hrz\' . image-mode) (\.icb\' . image-mode) (\.icc\' . image-mode) (\.icm\' . image-mode) (\.ico\' . image-mode) (\.icon\' . image-mode) (\.jbg\' . image-mode) (\.jbig\' . image-mode) (\.jng\' . image-mode) (\.jnx\' . image-mode) (\.miff\' . image-mode) (\.mng\' . image-mode) (\.mvg\' . image-mode) (\.otb\' . image-mode) (\.p7\' . image-mode) (\.pcx\' . image-mode) (\.pdb\' . image-mode) (\.pfa\' . image-mode) (\.pfb\' . image-mode) (\.picon\' . image-mode) (\.pict\' . image-mode) (\.rgb\' . image-mode) (\.rgba\' . image-mode) (\.tga\' . image-mode) (\.wbmp\' . image-mode) (\.webp\' . image-mode) (\.wmf\' . image-mode) (\.wpg\' . image-mode) (\.xcf\' . image-mode) (\.xmp\' . image-mode) (\.xwd\' . image-mode) (\.yuv\' . image-mode) (\.tgz\' . tar-mode) (\.tbz2?\' . tar-mode) (\.txz\' . tar-mode) (\.tzst\' . tar-mode))
 
 
 
@@ -1142,6 +1275,12 @@ Disable line numbers when in pdf mode.
 ;; Disable debugging
 (setq debug-on-error nil)
 (setq debug-on-quit nil)
+#+END_SRC
+
+
+** Say we are Done
+#+BEGIN_SRC emacs-lisp
+(message "init done")
 #+END_SRC
 
 
@@ -1171,10 +1310,10 @@ Disable line numbers when in pdf mode.
 #        (* 1 secs) nil 'org-caldav-sync)))
 
 #   ;; Actual calendar configuration edit this to meet your specific needs
-#   (setq org-caldav-url "https://p24-caldav.icloud.com/1003573358/calendars/B1532515-99F9-406D-821D-7E986DAF056E/user")
+#   (setq org-caldav-urlf "https://nextcloud.bearcave.totallyawesome.at:10541/remote.php/dav/calendars/marc")
 #       (setq org-caldav-calendars
 #     '(
-#       (:calendar-id "default"
+#       (:calendar-id "org"
 #         :files ("~/org/calendar.org")
 #         :inbox "~/org/calendar.org")))
 #   (setq org-caldav-backup-file "~/org-caldav/org-caldav-backup.org")

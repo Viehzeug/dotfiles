@@ -41,6 +41,8 @@
       "C-<right>"      #'+evil/window-move-right)
 
 
+(setq doom-font (font-spec :family "Ubuntu Mono" :size 17 :weight 'semi-light)
+      doom-variable-pitch-font (font-spec :family "Ubuntu" :size 16))
 
 
 ;; If you use `org' and don't want your org files in the default location below,
@@ -122,6 +124,9 @@
 (setq +latex-viewers '(pdf-tools))
 #+end_src
 
+* Latex
+
+
 * Org mode
 
 ** Org Setup
@@ -193,35 +198,35 @@
   )
 
 
-(use-package! org-roam-server
-  :after org-roam
-  :config
-  (setq org-roam-server-host "127.0.0.1"
-        org-roam-server-port 6005
-        org-roam-server-authenticate nil
-        org-roam-server-export-inline-images t
-        org-roam-server-serve-files nil
-        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-        org-roam-server-network-poll t
-        org-roam-server-network-arrows nil
-        org-roam-server-network-label-truncate t
-        org-roam-server-network-label-truncate-length 60
-        org-roam-server-network-label-wrap-length 20))
+;; (use-package! org-roam-server
+;;   :after org-roam
+;;   :config
+;;   (setq org-roam-server-host "127.0.0.1"
+;;         org-roam-server-port 6005
+;;         org-roam-server-authenticate nil
+;;         org-roam-server-export-inline-images t
+;;         org-roam-server-serve-files nil
+;;         org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+;;         org-roam-server-network-poll t
+;;         org-roam-server-network-arrows nil
+;;         org-roam-server-network-label-truncate t
+;;         org-roam-server-network-label-truncate-length 60
+;;         org-roam-server-network-label-wrap-length 20))
 
 
-(defun org-roam-server-open ()
-  "Ensure the server is active, then open the roam graph."
-  (interactive)
-  (smartparens-global-mode -1)
-  (org-roam-server-mode 1)
-  ;;  (browse-url-xdg-open (format "http://localhost:%d" org-roam-server-port))
-  (smartparens-global-mode 1))
+;; (defun org-roam-server-open ()
+;;   "Ensure the server is active, then open the roam graph."
+;;   (interactive)
+;;   (smartparens-global-mode -1)
+;;   (org-roam-server-mode 1)
+;;   ;;  (browse-url-xdg-open (format "http://localhost:%d" org-roam-server-port))
+;;   (smartparens-global-mode 1))
 
-;; automatically enable server-mode
-(after! org-roam
-  (smartparens-global-mode -1)
-  (org-roam-server-mode)
-  (smartparens-global-mode 1))
+;; ;; automatically enable server-mode
+;; (after! org-roam
+;;   (smartparens-global-mode -1)
+;;   (org-roam-server-mode)
+;;   (smartparens-global-mode 1))
 #+end_src
 
 
@@ -233,6 +238,7 @@
         '(("w" "work todo" entry (file "~/org/todo.org") "* TODO %? :work: \n SCHEDULED: %^t \n")
           ("p" "private todo" entry (file "~/org/todo.org") "* TODO %? :private: \n SCHEDULED: %^t \n")
           ("c" "cooking" entry (file "~/org/cooking.org") "* %?\n")
+          ("d" "date/calendar entry" entry (file "~/org/cal.org") "* %?\n%^T")
           ("r" "reading" entry (file "~/org/read.org") "* %?\n")
           ("m" "media [music, games, movies, recreational books] to consider" entry (file+headline "~/org/media.org" "To check out") "** %? %^g\n")
           ("s" "want (shopping)" entry (file+headline "~/org/shopping.org" "Want") "** %?\n")
@@ -382,4 +388,57 @@
         '("https://francisbach.com/feed/"
           "https://akosiorek.github.io/feed.xml"
           "https://www.inference.vc/rss/")))
+#+end_src
+
+* Spelling
+
+Based on https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html.
+and https://github.com/hlissner/doom-emacs/issues/4138
+#+begin_src emacs-lisp
+(after! ispell
+  ;; Configure `LANG`, otherwise ispell.el cannot find a 'default
+  ;; dictionary' even though multiple dictionaries will be configured
+  ;; in next line.
+  ;;(setenv "LANG" "en_US")
+  ;; Configure German, Swiss German, and two variants of English.
+  (setq ispell-dictionary "en");; "de_DE,de_CH,de_AT,en_GB,en_US")
+  ;; ispell-set-spellchecker-params has to be called
+  ;; before ispell-hunspell-add-multi-dic will work
+  ;; (ispell-set-spellchecker-params)
+  ;;(ispell-hunspell-add-multi-dic "de_DE,de_CH,de_AT,en_GB,en_US")
+  )
+#+end_src
+
+
+* Calendar
+
+
+#+BEGIN_SRC emacs-lisp
+;; (defun open-cal()
+;;   (interactive)
+;;   (cfw:open-calendar-buffer
+;;    :contents-sources
+;;    (list
+;;     (cfw:org-create-file-source "cal" "~/org/cal.org" "Green")
+;;     (cfw:org-create-source "Blue")  ; org-agenda source
+;;                                         ;(cfw:org-create-file-source "cal" "/path/to/cal.org" "Cyan")  ; other org source
+;;                                         ;(cfw:howm-create-source "Blue")  ; howm source
+;;                                         ;(cfw:cal-create-source "Orange") ; diary source
+;;                                         ;(cfw:ical-create-source "Moon" "~/moon.ics" "Gray")  ; ICS source1
+;;                                         ;(cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
+;;     )))
+#+END_SRC
+
+
+* Python LSP
+
+#+begin_src emacs-lisp
+;; (add-to-list 'tramp-remote-path "/home/marc/miniconda3/bin")
+
+;; (after! lsp-mode
+;; (lsp-register-client
+;;     (make-lsp-client :new-connection (lsp-tramp-connection "pyright")
+;;                      :major-modes '(python-mode)
+;;                      :remote? t
+;;                      :server-id 'pyls-remote)))
 #+end_src
