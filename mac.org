@@ -75,7 +75,10 @@ brew install r
 brew install youtube-dl
 brew install z
 brew install ripgrep
-brew install df
+brew install fd
+brew install cmake
+brew install dot
+brew install gnu-sed
 
 brew tap railwaycat/emacsmacport
 brew install emacs-mac --with-emacs-big-sur-icon --with-mac-metal --with-modules
@@ -86,6 +89,7 @@ ln -s /usr/local/opt/emacs-mac/Emacs.app /Applications/Emacs.app
 #+begin_src sh :tangle setup_osx.sh
 brew tap homebrew/cask-fonts
 brew install font-ubuntu
+brew install font-ubuntu-mono
 #+end_src
 
 ** Dotfiles
@@ -149,7 +153,6 @@ apps=(
   whatsapp
   zoom zotero
 )
-  #nextcloud
 # pokemon-reborn
 
 # Install apps to /Applications

@@ -18,3 +18,5 @@ ln -s  $SRC_DIR"/.profile" $HOME"/.profile"
 #echo 'default' > ~/.emacs-profile
 
 wget https://raw.githubusercontent.com/rupa/z/master/z.sh -O ~/.z.sh
+
+ln -s  $HOME"/ownCloud/org" $HOME"/org"
