@@ -77,13 +77,23 @@ brew install z
 brew install ripgrep
 brew install fd
 brew install cmake
-brew install dot
+brew install graphviz
 brew install gnu-sed
 
 brew tap railwaycat/emacsmacport
 brew install emacs-mac --with-emacs-big-sur-icon --with-mac-metal --with-modules
 ln -s /usr/local/opt/emacs-mac/Emacs.app /Applications/Emacs.app
 #+end_src
+
+*** Install important brew packages
+#+begin_src sh :tangle setup_osx.sh
+echo "Installing rust and texlab..."
+brew install rust
+cargo install --git https://github.com/latex-lsp/texlab.git --locked
+#+end_src
+
+
+
 
 ** Fonts
 #+begin_src sh :tangle setup_osx.sh
@@ -129,6 +139,7 @@ apps=(
   inkscape
   iterm2
   julia
+  keybase
   latexit
   mactex
   microsoft-office
@@ -141,17 +152,20 @@ apps=(
   protonmail-bridge
   skype
   slack
+  signal
   steam
   telegram
   textexpander
   the-unarchiver
+  timemachineeditor
   tor-browser
   virtualbox
   visual-studio-code
   vlc
   vmware-fusion
   whatsapp
-  zoom zotero
+  zoom
+  zotero
 )
 # pokemon-reborn
 
@@ -162,6 +176,14 @@ brew install --cask --appdir="/Applications" ${apps[@]}
 
 brew cleanup
 #+end_src
+
+** setup conda
+
+#+begin_src sh :tangle setup_osx.sh
+conda init zsh
+#+end_src
+
+
 
 * Mac OS settings
 
