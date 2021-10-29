@@ -141,7 +141,9 @@ apps=(
   julia
   keybase
   latexit
+  libreoffice
   mactex
+  microsoft-teams
   microsoft-office
   miniconda
   nordvpn
@@ -164,6 +166,7 @@ apps=(
   vlc
   vmware-fusion
   whatsapp
+  xquartz
   zoom
   zotero
 )

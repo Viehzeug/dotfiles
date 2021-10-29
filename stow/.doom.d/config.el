@@ -1,20 +1,3 @@
-* Resources
-
-- https://github.com/hlissner/doom-emacs-private/blob/master/config.el
-- https://noelwelsh.com/posts/2019-01-10-doom-emacs.html
-  + org mode setup; superagenda
-- https://tecosaur.github.io/emacs-config/config.html
-  + superagenda here
-  + org capture templates
-- https://dotdoom.rgoswami.me/config.html
-  + better key comands for less finger travel
-  + better org mode shortcuts
-
-
-
-* Personal Setup
-
-#+begin_src emacs-lisp
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Marc Fischer"
@@ -49,23 +32,13 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/"
       org-roam-directory (concat org-directory "roamv2/"))
-#+end_src
 
-
-
-* Look and Feel
-#+begin_src emacs-lisp
 (setq doom-theme 'doom-solarized-light)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
-#+end_src
 
-
-** Symbols
-
-#+begin_src emacs-lisp
 (plist-put! +ligatures-extra-symbols
   ;; org
   :name          "»"
@@ -105,32 +78,15 @@
   ;;:pipe          "" ;; FIXME: find a non-private char
   :dot           "•")  ;; you could also add your own if you want
 
-#+end_src
-
-** Mac-OS Keys
-
-#+begin_src emacs-lisp
 (setq mac-command-modifier      'super
       ns-command-modifier       'super
       mac-option-modifier       'meta
       ns-option-modifier        'meta
       mac-right-option-modifier 'meta
       ns-right-option-modifier  'meta)
-#+end_src
 
-** PDF Viewer
-
-#+begin_src emacs-lisp
 (setq +latex-viewers '(pdf-tools))
-#+end_src
 
-* Latex
-
-
-* Org mode
-
-** Org Setup
-#+begin_src emacs-lisp
 (after! org
   (setq ;; Make org and org-recur work nicely
    ;; Log time a task was set to Done.
@@ -156,10 +112,7 @@
    org-journal-file-format "%Y%m%d.org")
 
   )
-#+end_src
 
-** Better Recurrent Tasks
-#+begin_src emacs-lisp
 (use-package! org-recur
   :after org
   :hook ((org-mode . org-recur-mode)
@@ -173,10 +126,6 @@
       :leader
       :desc "Mark as done (and reshedule if appicalbe)" "d" #'org-recur-finish)
 )
-#+end_src
-
-** Org Roam Server
-#+begin_src emacs-lisp
 
 ;; (after! org-roam
 ;;   (setq org-roam-capture-templates
@@ -241,12 +190,7 @@
 ;;   (smartparens-global-mode -1)
 ;;   (org-roam-server-mode)
 ;;   (smartparens-global-mode 1))
-#+end_src
 
-
-** Org Capture Templates
-
-#+begin_src emacs-lisp
 (after! org
   (setq org-capture-templates
         '(("w" "work todo" entry (file "~/org/todo.org") "* TODO %? :work: \n SCHEDULED: %^t \n")
@@ -258,11 +202,7 @@
           ("s" "want (shopping)" entry (file+headline "~/org/shopping.org" "Want") "** %?\n")
           ("o" "quote" entry (file "~/org/quotes.org") "* %^{quote}\n:PROPERTIES:\n:BY: %^{by}\n:FROM: %^{from}\n:END:" :empty-lines 1)))
   )
-#+end_src
 
-** Org-ref (with Zotero Integration)
-
-#+begin_src emacs-lisp
 ;; zotero pdf support
 ;; https://github.com/jkitchin/org-ref/blob/4f26ac56db785b4bff05e75ae7decc44be2ba89e/org-ref.org
 (defun my/org-ref-open-pdf-at-point ()
@@ -286,10 +226,7 @@
     (ivy-add-actions 'ivy-bibtex '(("SPC" ivy-bibtex-quicklook "Quick look")))))
 
 
-(use-package! helm-bibtex
-  ;;:when (featurep! :completion helm)
-  ;;:commands helm-bibtex)
-  )
+
 
 
 (use-package! org-ref
@@ -307,14 +244,7 @@
 (map! :map org-mode-map
       :leader
       :desc "Cite from Zotero" "]" #'org-ref-ivy-insert-cite-link)
-#+end_src
 
-#+RESULTS:
-: org-ref-ivy-insert-cite-link
-
-
-** Org Roam Bibtex
-#+begin_src emacs-lisp
 (use-package org-roam-bibtex
   :after (org-roam org-ref)
   :hook (org-roam-mode . org-roam-bibtex-mode)
@@ -329,7 +259,7 @@
  - tags ::
  - keywords :: ${keywords}
 
- ,* ${title}
+ * ${title}
  :PROPERTIES:
  :Custom_ID: ${citekey}
  :URL: ${url}
@@ -339,9 +269,7 @@
  :END:"
                                  ))
                 ))
-#+end_src
 
-#+begin_src emacs-lisp
 (map! :leader
       (:prefix-map ("C" . "additional capture")
        :desc "Journal Entry" "j" #'org-journal-new-entry
@@ -349,13 +277,7 @@
        :desc "Roam Capture" "r" #'org-roam-find-file
        :desc "Roam Daily" "d" #'org-roam-dailies-find-today
        ))
-#+end_src
 
-
-
-** Org Super Agenda
-
-#+begin_src emacs-lisp
 (use-package! org-super-agenda
   :commands (org-super-agenda-mode))
 (after! org-agenda
@@ -376,39 +298,18 @@
          :tag "work")
         (:name "Private"
          :tag "private")))
-#+end_src
 
+(use-package! org-ql
+  :after org)
 
-** Org QL
-
-#+begin_src emacs-lisp
-  (use-package! org-ql
-    :after org)
-#+end_src
-
-
-
-** D
-
-#+begin_src emacs-lisp
 (use-package! d-mode)
-#+end_src
 
-* Elfeed
-
-#+begin_src emacs-lisp
 (after! elfeed
   (setq elfeed-feeds
         '("https://francisbach.com/feed/"
           "https://akosiorek.github.io/feed.xml"
           "https://www.inference.vc/rss/")))
-#+end_src
 
-* Spelling
-
-Based on https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html.
-and https://github.com/hlissner/doom-emacs/issues/4138
-#+begin_src emacs-lisp
 (after! ispell
   ;; Configure `LANG`, otherwise ispell.el cannot find a 'default
   ;; dictionary' even though multiple dictionaries will be configured
@@ -421,13 +322,7 @@ and https://github.com/hlissner/doom-emacs/issues/4138
   ;; (ispell-set-spellchecker-params)
   ;;(ispell-hunspell-add-multi-dic "de_DE,de_CH,de_AT,en_GB,en_US")
   )
-#+end_src
 
-
-* Calendar
-
-
-#+BEGIN_SRC emacs-lisp
 ;; (defun open-cal()
 ;;   (interactive)
 ;;   (cfw:open-calendar-buffer
@@ -441,13 +336,9 @@ and https://github.com/hlissner/doom-emacs/issues/4138
 ;;                                         ;(cfw:ical-create-source "Moon" "~/moon.ics" "Gray")  ; ICS source1
 ;;                                         ;(cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
 ;;     )))
-#+END_SRC
 
-
-* Python LSP
-
-#+begin_src emacs-lisp
-;; (add-to-list 'tramp-remote-path "/home/marc/miniconda3/bin")
+(add-to-list 'tramp-remote-path "/home/marc/miniconda3/bin")
+;; (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 
 ;; (after! lsp-mode
 ;; (lsp-register-client
@@ -455,4 +346,3 @@ and https://github.com/hlissner/doom-emacs/issues/4138
 ;;                      :major-modes '(python-mode)
 ;;                      :remote? t
 ;;                      :server-id 'pyls-remote)))
-#+end_src
