@@ -53,7 +53,7 @@
 (package! org-recur)
 (package! d-mode)
 (package! org-ref)
-(package! org-roam-server)
+;; (package! org-roam-server)
 (package! org-super-agenda)
 (package! org-ql)
 
@@ -65,4 +65,7 @@
   :recipe (:host github :repo "org-roam/org-roam-bibtex"))
 
 ;; When using org-roam via the `+roam` flag
-(unpin! org-roam company-org-roam)
+;;(unpin! org-roam company-org-roam)
+
+(package! websocket)
+(package! org-roam-ui :recipe (:host github :repo "org-roam/org-roam-ui" :files ("*.el" "out")))

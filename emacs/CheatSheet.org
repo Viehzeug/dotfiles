@@ -84,14 +84,15 @@ Based on my emacs config.
 #+latex: \columnbreak
 
 *Ivy & Search*
-| ~M-x~     | (ivy) ~M-x~           |
-| ~C-s~     | (ivy) text search     |
-| ~C-c C-r~ | (ivy) resume          |
-| ~C-c p~   | (ivy) find file git   |
-| ~C-c g~   | (ivy) ~rg~            |
-| ~C-c C-g~ | ~rg~ (full interface) |
-| ~C-x C-f~ | (ivy) find-file       |
-|           |                       |
+| ~M-x~       | (ivy) ~M-x~           |
+| ~M-x occur~ | find text occurrences |
+| ~C-s~       | (ivy) text search     |
+| ~C-c C-r~   | (ivy) resume          |
+| ~C-c p~     | (ivy) find file git   |
+| ~C-c r~     | (ivy) ~rg~            |
+| ~C-c C-r~   | ~rg~ (full interface) |
+| ~C-x C-f~   | (ivy) find-file       |
+|             |                       |
 
 *Spellchecking & Company* 
 | ~<f12>~   | correct word at point                 |
@@ -112,7 +113,8 @@ Based on my emacs config.
 | ~C-S-<down>~ | move selected text block down |
 | ~M-;~        | ~comment-region~              |
 | ~C-M-;~      | ~uncomment-region~            |
-| ~<f11>~      | whitespace-mode               |
+| ~<f11>~      | ~whitespace-mode~             |
+| ~C-c w~      | ~elete-trailing-whitespace~   |
 
 Delete white space by ~M-x delete-trailing-whitespace~.
 

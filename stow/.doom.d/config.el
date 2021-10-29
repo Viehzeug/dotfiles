@@ -1,20 +1,3 @@
-* Resources
-
-- https://github.com/hlissner/doom-emacs-private/blob/master/config.el
-- https://noelwelsh.com/posts/2019-01-10-doom-emacs.html
-  + org mode setup; superagenda
-- https://tecosaur.github.io/emacs-config/config.html
-  + superagenda here
-  + org capture templates
-- https://dotdoom.rgoswami.me/config.html
-  + better key comands for less finger travel
-  + better org mode shortcuts
-
-
-
-* Personal Setup
-
-#+begin_src emacs-lisp
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Marc Fischer"
@@ -41,29 +24,21 @@
       "C-<right>"      #'+evil/window-move-right)
 
 
+(setq doom-font (font-spec :family "Ubuntu Mono" :size 17 :weight 'semi-light)
+      doom-variable-pitch-font (font-spec :family "Ubuntu" :size 16))
 
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/"
-      org-roam-directory (concat org-directory "notes/"))
-#+end_src
+      org-roam-directory (concat org-directory "roamv2/"))
 
-
-
-* Look and Feel
-#+begin_src emacs-lisp
 (setq doom-theme 'doom-solarized-light)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
-#+end_src
 
-
-** Symbols
-
-#+begin_src emacs-lisp
 (plist-put! +ligatures-extra-symbols
   ;; org
   :name          "»"
@@ -103,29 +78,15 @@
   ;;:pipe          "" ;; FIXME: find a non-private char
   :dot           "•")  ;; you could also add your own if you want
 
-#+end_src
-
-** Mac-OS Keys
-
-#+begin_src emacs-lisp
 (setq mac-command-modifier      'super
       ns-command-modifier       'super
       mac-option-modifier       'meta
       ns-option-modifier        'meta
       mac-right-option-modifier 'meta
       ns-right-option-modifier  'meta)
-#+end_src
 
-** PDF Viewer
-
-#+begin_src emacs-lisp
 (setq +latex-viewers '(pdf-tools))
-#+end_src
 
-* Org mode
-
-** Org Setup
-#+begin_src emacs-lisp
 (after! org
   (setq ;; Make org and org-recur work nicely
    ;; Log time a task was set to Done.
@@ -151,10 +112,7 @@
    org-journal-file-format "%Y%m%d.org")
 
   )
-#+end_src
 
-** Better Recurrent Tasks
-#+begin_src emacs-lisp
 (use-package! org-recur
   :after org
   :hook ((org-mode . org-recur-mode)
@@ -168,81 +126,83 @@
       :leader
       :desc "Mark as done (and reshedule if appicalbe)" "d" #'org-recur-finish)
 )
-#+end_src
 
-** Org Roam Server
-#+begin_src emacs-lisp
+;; (after! org-roam
+;;   (setq org-roam-capture-templates
+;;         '(("d" "default" plain (function org-roam--capture-get-point)
+;;            "%?"
+;;            :file-name "${slug}"
+;;            :head "#+title: ${title}\n#+ROAM_TAGS: ${tag}\n"
+;;            :immediate-finish t
+;;            :unnarrowed t))
+;;         org-roam-capture-ref-templates
+;;         '(("r" "ref" plain (function org-roam-capture--get-point)
+;;            "%?"
+;;            :file-name "${slug}"
+;;            :head "#+roam_key: ${ref}
+;; #+roam_tags: ${tag}
+;; #+title: ${title}
+;; - source :: ${ref}"
+;;            :unnarrowed t)))
+;;   )
 
-(after! org-roam
-  (setq org-roam-capture-templates
-        '(("d" "default" plain (function org-roam--capture-get-point)
-           "%?"
-           :file-name "${slug}"
-           :head "#+title: ${title}\n#+ROAM_TAGS: ${tag}\n"
-           :immediate-finish t
-           :unnarrowed t))
-        org-roam-capture-ref-templates
-        '(("r" "ref" plain (function org-roam-capture--get-point)
-           "%?"
-           :file-name "${slug}"
-           :head "#+roam_key: ${ref}
-,#+roam_tags: ${tag}
-,#+title: ${title}
-- source :: ${ref}"
-           :unnarrowed t)))
-  )
+(use-package! websocket
+    :after org-roam)
 
+(use-package! org-roam-ui
+    :after org-roam ;; or :after org
+;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+;;         a hookable mode anymore, you're advised to pick something yourself
+;;         if you don't care about startup time, use
+;;  :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
 
-(use-package! org-roam-server
-  :after org-roam
-  :config
-  (setq org-roam-server-host "127.0.0.1"
-        org-roam-server-port 6005
-        org-roam-server-authenticate nil
-        org-roam-server-export-inline-images t
-        org-roam-server-serve-files nil
-        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-        org-roam-server-network-poll t
-        org-roam-server-network-arrows nil
-        org-roam-server-network-label-truncate t
-        org-roam-server-network-label-truncate-length 60
-        org-roam-server-network-label-wrap-length 20))
-
-
-(defun org-roam-server-open ()
-  "Ensure the server is active, then open the roam graph."
-  (interactive)
-  (smartparens-global-mode -1)
-  (org-roam-server-mode 1)
-  ;;  (browse-url-xdg-open (format "http://localhost:%d" org-roam-server-port))
-  (smartparens-global-mode 1))
-
-;; automatically enable server-mode
-(after! org-roam
-  (smartparens-global-mode -1)
-  (org-roam-server-mode)
-  (smartparens-global-mode 1))
-#+end_src
+;; (use-package! org-roam-server
+;;   :after org-roam
+;;   :config
+;;   (setq org-roam-server-host "127.0.0.1"
+;;         org-roam-server-port 6005
+;;         org-roam-server-authenticate nil
+;;         org-roam-server-export-inline-images t
+;;         org-roam-server-serve-files nil
+;;         org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+;;         org-roam-server-network-poll t
+;;         org-roam-server-network-arrows nil
+;;         org-roam-server-network-label-truncate t
+;;         org-roam-server-network-label-truncate-length 60
+;;         org-roam-server-network-label-wrap-length 20))
 
 
-** Org Capture Templates
+;; (defun org-roam-server-open ()
+;;   "Ensure the server is active, then open the roam graph."
+;;   (interactive)
+;;   (smartparens-global-mode -1)
+;;   (org-roam-server-mode 1)
+;;   ;;  (browse-url-xdg-open (format "http://localhost:%d" org-roam-server-port))
+;;   (smartparens-global-mode 1))
 
-#+begin_src emacs-lisp
+;; ;; automatically enable server-mode
+;; (after! org-roam
+;;   (smartparens-global-mode -1)
+;;   (org-roam-server-mode)
+;;   (smartparens-global-mode 1))
+
 (after! org
   (setq org-capture-templates
         '(("w" "work todo" entry (file "~/org/todo.org") "* TODO %? :work: \n SCHEDULED: %^t \n")
           ("p" "private todo" entry (file "~/org/todo.org") "* TODO %? :private: \n SCHEDULED: %^t \n")
           ("c" "cooking" entry (file "~/org/cooking.org") "* %?\n")
+          ("d" "date/calendar entry" entry (file "~/org/cal.org") "* %?\n%^T")
           ("r" "reading" entry (file "~/org/read.org") "* %?\n")
           ("m" "media [music, games, movies, recreational books] to consider" entry (file+headline "~/org/media.org" "To check out") "** %? %^g\n")
           ("s" "want (shopping)" entry (file+headline "~/org/shopping.org" "Want") "** %?\n")
           ("o" "quote" entry (file "~/org/quotes.org") "* %^{quote}\n:PROPERTIES:\n:BY: %^{by}\n:FROM: %^{from}\n:END:" :empty-lines 1)))
   )
-#+end_src
 
-** Org-ref (with Zotero Integration)
-
-#+begin_src emacs-lisp
 ;; zotero pdf support
 ;; https://github.com/jkitchin/org-ref/blob/4f26ac56db785b4bff05e75ae7decc44be2ba89e/org-ref.org
 (defun my/org-ref-open-pdf-at-point ()
@@ -266,10 +226,7 @@
     (ivy-add-actions 'ivy-bibtex '(("SPC" ivy-bibtex-quicklook "Quick look")))))
 
 
-(use-package! helm-bibtex
-  ;;:when (featurep! :completion helm)
-  ;;:commands helm-bibtex)
-  )
+
 
 
 (use-package! org-ref
@@ -287,14 +244,7 @@
 (map! :map org-mode-map
       :leader
       :desc "Cite from Zotero" "]" #'org-ref-ivy-insert-cite-link)
-#+end_src
 
-#+RESULTS:
-: org-ref-ivy-insert-cite-link
-
-
-** Org Roam Bibtex
-#+begin_src emacs-lisp
 (use-package org-roam-bibtex
   :after (org-roam org-ref)
   :hook (org-roam-mode . org-roam-bibtex-mode)
@@ -309,7 +259,7 @@
  - tags ::
  - keywords :: ${keywords}
 
- ,* ${title}
+ * ${title}
  :PROPERTIES:
  :Custom_ID: ${citekey}
  :URL: ${url}
@@ -319,9 +269,7 @@
  :END:"
                                  ))
                 ))
-#+end_src
 
-#+begin_src emacs-lisp
 (map! :leader
       (:prefix-map ("C" . "additional capture")
        :desc "Journal Entry" "j" #'org-journal-new-entry
@@ -329,13 +277,7 @@
        :desc "Roam Capture" "r" #'org-roam-find-file
        :desc "Roam Daily" "d" #'org-roam-dailies-find-today
        ))
-#+end_src
 
-
-
-** Org Super Agenda
-
-#+begin_src emacs-lisp
 (use-package! org-super-agenda
   :commands (org-super-agenda-mode))
 (after! org-agenda
@@ -356,30 +298,51 @@
          :tag "work")
         (:name "Private"
          :tag "private")))
-#+end_src
 
+(use-package! org-ql
+  :after org)
 
-** Org QL
-
-#+begin_src emacs-lisp
-  (use-package! org-ql
-    :after org)
-#+end_src
-
-
-
-** D
-
-#+begin_src emacs-lisp
 (use-package! d-mode)
-#+end_src
 
-* Elfeed
-
-#+begin_src emacs-lisp
 (after! elfeed
   (setq elfeed-feeds
         '("https://francisbach.com/feed/"
           "https://akosiorek.github.io/feed.xml"
           "https://www.inference.vc/rss/")))
-#+end_src
+
+(after! ispell
+  ;; Configure `LANG`, otherwise ispell.el cannot find a 'default
+  ;; dictionary' even though multiple dictionaries will be configured
+  ;; in next line.
+  ;;(setenv "LANG" "en_US")
+  ;; Configure German, Swiss German, and two variants of English.
+  (setq ispell-dictionary "en");; "de_DE,de_CH,de_AT,en_GB,en_US")
+  ;; ispell-set-spellchecker-params has to be called
+  ;; before ispell-hunspell-add-multi-dic will work
+  ;; (ispell-set-spellchecker-params)
+  ;;(ispell-hunspell-add-multi-dic "de_DE,de_CH,de_AT,en_GB,en_US")
+  )
+
+;; (defun open-cal()
+;;   (interactive)
+;;   (cfw:open-calendar-buffer
+;;    :contents-sources
+;;    (list
+;;     (cfw:org-create-file-source "cal" "~/org/cal.org" "Green")
+;;     (cfw:org-create-source "Blue")  ; org-agenda source
+;;                                         ;(cfw:org-create-file-source "cal" "/path/to/cal.org" "Cyan")  ; other org source
+;;                                         ;(cfw:howm-create-source "Blue")  ; howm source
+;;                                         ;(cfw:cal-create-source "Orange") ; diary source
+;;                                         ;(cfw:ical-create-source "Moon" "~/moon.ics" "Gray")  ; ICS source1
+;;                                         ;(cfw:ical-create-source "gcal" "https://..../basic.ics" "IndianRed") ; google calendar ICS
+;;     )))
+
+(add-to-list 'tramp-remote-path "/home/marc/miniconda3/bin")
+;; (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+
+;; (after! lsp-mode
+;; (lsp-register-client
+;;     (make-lsp-client :new-connection (lsp-tramp-connection "pyright")
+;;                      :major-modes '(python-mode)
+;;                      :remote? t
+;;                      :server-id 'pyls-remote)))
