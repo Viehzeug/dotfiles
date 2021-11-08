@@ -29,6 +29,7 @@ vim.api.nvim_exec(
 local use = require('packer').use
 require('packer').startup(function()
   use 'wbthomason/packer.nvim' -- Package manager
+  use 'equalsraf/neovim-gui-shim' -- GUI shim
   use 'tpope/vim-fugitive' -- Git commands in nvim
   use 'tpope/vim-rhubarb' -- Fugitive-companion to interact with github
   use 'tpope/vim-commentary' -- "gc" to comment visual regions/lines
@@ -294,6 +295,7 @@ wk.register({
 	k = {"<C-w>k", "up"},
 	l = {"<C-w>l", "right"},
 	mm = {"<cmd>only<cr>", "maximize"},
+	o = {"<cmd>only<cr>", "maximize"},
 	}
 }, { prefix = "<leader>" })
 
