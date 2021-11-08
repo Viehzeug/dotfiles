@@ -1,10 +1,12 @@
 -- based on  nvim-lua / kickstart.nvim
 
 
--- todo
+-- todo:
+-- other colorscheme(s)
+-- other font(s)
+-- window management/movement
+-- terminal
 -- keybindings
--- colorscheme(s)
--- dotfiles
 -- spelling correction
 
 -- Install packer
@@ -32,7 +34,9 @@ require('packer').startup(function()
   use 'tpope/vim-commentary' -- "gc" to comment visual regions/lines
   use 'ludovicchabant/vim-gutentags' -- Automatic tags management
   -- UI to select things (files, grep results, open buffers...)
-  use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
+  --use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
+  use { 'liuchengxu/vim-clap', run = ':Clap install-binary!' }
+
   -- use 'joshdick/onedark.vim' -- Theme inspired by Atom
   use 'ishan9299/nvim-solarized-lua' -- Color Theme
   use 'itchyny/lightline.vim' -- Fancier statusline
@@ -52,7 +56,16 @@ require('packer').startup(function()
   use { 'neoclide/coc.nvim', branch = 'release' }
   use 'github/copilot.vim'
   use 'folke/which-key.nvim'
+  use {'kristijanhusak/orgmode.nvim', config = function()
+		require('orgmode').setup{}
+	end
+	}
 end)
+
+-- spell check
+vim.spelllang='en,de'
+vim.spellsuggest='best,9'
+
 
 vim.clipboard='unamend'
 
@@ -115,6 +128,21 @@ vim.g.maplocalleader = ' '
 vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
 
+
+-- Terminal
+vim.api.nvim_exec(
+  [[
+augroup custom_term
+	autocmd!
+	autocmd TermOpen * setlocal nonumber norelativenumber bufhidden=hide
+augroup END
+]],
+  false
+)
+
+
+
+
 -- Highlight on yank
 vim.api.nvim_exec(
   [[
@@ -148,16 +176,16 @@ require('gitsigns').setup {
 }
 
 -- Telescope
-require('telescope').setup {
-  defaults = {
-    mappings = {
-      i = {
-        ['<C-u>'] = false,
-        ['<C-d>'] = false,
-      },
-    },
-  },
-}
+-- require('telescope').setup {
+--  defaults = {
+--    mappings = {
+--      i = {
+--        ['<C-u>'] = false,
+--        ['<C-d>'] = false,
+--      },
+--    },
+--  },
+--}
 --Add leader shortcuts
 vim.api.nvim_set_keymap('n', '<leader><space>', [[<cmd>lua require('telescope.builtin').buffers()<CR>]], { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>sf', [[<cmd>lua require('telescope.builtin').find_files({previewer = false})<CR>]], { noremap = true, silent = true })
@@ -177,11 +205,25 @@ vim.g.coc_global_extensions = {
 
 
 -- Treesitter configuration
+
+-- Setup org mode parser
+local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+parser_config.org = {
+  install_info = {
+    url = 'https://github.com/milisims/tree-sitter-org',
+    revision = 'main',
+    files = {'src/parser.c', 'src/scanner.cc'},
+  },
+  filetype = 'org',
+}
+
 -- Parsers must be installed manually via :TSInstall
 require('nvim-treesitter.configs').setup {
-  ensure_installed = "maintained",
+  ensure_installed = "maintained", -- make sure org is also (manually) installed
   highlight = {
     enable = true, -- false will disable the whole extension
+    disable = {'org'}, -- Remove this to use TS highlighter for some of the highlights (Experimental)
+    additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
   },
   incremental_selection = {
     enable = true,
@@ -230,14 +272,26 @@ require('nvim-treesitter.configs').setup {
   },
 }
 
+
+
+
+
+-- setup which key
+vim.timeoutlen = 0
 local wk = require("which-key")
 wk.register({
   f = {
     name = "file", -- optional group name
-    f = { "<cmd>Telescope find_files<cr>", "Find File" }, -- create a binding with label
-    b = { function() print("bar") end, "Foobar" } -- you can also pass functions!
+    f = { "<cmd>Clap filer<cr>", "Find File" }, -- create a binding with label
+    -- b = { function() print("bar") end, "Foobar" } -- you can also pass functions!
   },
 }, { prefix = "<leader>" })
+
+-- make the config touchbar safe
+for i=1,10 do
+	vim.api.nvim_set_keymap('', string.format("<F%d>", i), '<NOP>', { noremap = true, silent = true })
+	vim.api.nvim_set_keymap('!', string.format("<F%d>", i), '<NOP>', { noremap = true, silent = true })
+end
 
 
 -- -- LSP settings
