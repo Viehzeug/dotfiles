@@ -285,6 +285,16 @@ wk.register({
     f = { "<cmd>Clap filer<cr>", "Find File" }, -- create a binding with label
     -- b = { function() print("bar") end, "Foobar" } -- you can also pass functions!
   },
+  w = {
+	name = "window",
+	v = {"<cmd>vsp<cr>", "Vertical Split"},
+	s = {"<cmd>sp<cr>", "Horizontal Split"},
+	h = {"<C-w>h", "left"},
+	j = {"<C-w>j", "down"},
+	k = {"<C-w>k", "up"},
+	l = {"<C-w>l", "right"},
+	mm = {"<cmd>only<cr>", "maximize"},
+	}
 }, { prefix = "<leader>" })
 
 -- make the config touchbar safe
