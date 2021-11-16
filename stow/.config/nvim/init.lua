@@ -276,7 +276,6 @@ require('nvim-treesitter.configs').setup {
 
 
 
-
 -- setup which key
 vim.timeoutlen = 0
 local wk = require("which-key")
@@ -286,6 +285,11 @@ wk.register({
     f = { "<cmd>Clap filer<cr>", "Find File" }, -- create a binding with label
     -- b = { function() print("bar") end, "Foobar" } -- you can also pass functions!
   },
+  b = {
+    name = "buffer", -- optional group name
+    b = { "<cmd>Clap buffers<cr>", "Find buffer" }, -- create a binding with label
+  },
+
   w = {
 	name = "window",
 	v = {"<cmd>vsp<cr>", "Vertical Split"},
