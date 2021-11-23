@@ -68,7 +68,7 @@ vim.spelllang='en,de'
 vim.spellsuggest='best,9'
 
 
-vim.clipboard='unamend'
+vim.clipboard='unamend,unamendplus'
 
 --Incremental live completion (note: this is now a default on master)
 vim.o.inccommand = 'nosplit'
@@ -102,6 +102,13 @@ vim.wo.signcolumn = 'yes'
 -- GUI copy/paste 
 vim.cmd('cmap <D-v> <C-R>+')
 vim.cmd('imap <D-v> <C-R>+')
+vim.cmd('cmap <D-c> "+y')
+vim.cmd('imap <D-c> "+y')
+vim.cmd('cmap <D-x> "+x')
+vim.cmd('imap <D-x> "+x')
+
+
+
 
 --Set colorscheme (order is important here)
 vim.o.termguicolors = true
@@ -287,7 +294,8 @@ wk.register({
   },
   b = {
     name = "buffer", -- optional group name
-    b = { "<cmd>Clap buffers<cr>", "Find buffer" }, -- create a binding with label
+    b = { "<cmd>Clap buffers<cr>", "Find buffer" },
+    r = { "<cmd>e!<cr>", "Reload current" },
   },
 
   w = {
@@ -300,7 +308,11 @@ wk.register({
 	l = {"<C-w>l", "right"},
 	mm = {"<cmd>only<cr>", "maximize"},
 	o = {"<cmd>only<cr>", "maximize"},
-	}
+	},
+  p = {'"+p', '[p]aste from clipboard'},
+  P = {'"+P', '[P]aste from clipboard'},
+  y = {'"+y', '[y]ank to clipboard'},
+  Y = {'"+yy', '[yy]ank to clipboard'}
 }, { prefix = "<leader>" })
 
 -- make the config touchbar safe
