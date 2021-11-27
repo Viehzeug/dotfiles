@@ -100,12 +100,12 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
 
 -- GUI copy/paste 
-vim.cmd('cmap <D-v> <C-R>+')
+vim.cmd('nmap <D-v> <C-R>+')
 vim.cmd('imap <D-v> <C-R>+')
-vim.cmd('cmap <D-c> "+y')
-vim.cmd('imap <D-c> "+y')
-vim.cmd('cmap <D-x> "+x')
-vim.cmd('imap <D-x> "+x')
+vim.cmd('vnoremap <D-c> "+y')
+vim.cmd('vnoremap <D-x> "+x')
+vim.cmd('imap <D-a> <ESC>ggVG')
+vim.cmd('nmap <D-a> ggVG')
 
 
 
@@ -119,6 +119,8 @@ vim.g.solarized_diffmode = 'normal'
 vim.g.solarized_statusline = 'normal'
 vim.g.solarized_italics = 1
 vim.cmd [[colorscheme solarized]]
+
+vim.g.clap_theme = 'solarized_light'
 
 --Set statusbar
 vim.g.lightline = {
