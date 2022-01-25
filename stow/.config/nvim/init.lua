@@ -57,10 +57,10 @@ require('packer').startup(function()
   --use { 'neoclide/coc.nvim', branch = 'release' }
   use 'github/copilot.vim'
   use 'folke/which-key.nvim'
-  use {'kristijanhusak/orgmode.nvim', config = function()
-		require('orgmode').setup{}
-	end
-	}
+  -- use {'kristijanhusak/orgmode.nvim', config = function()
+		-- require('orgmode').setup{}
+	-- end
+	-- }
 end)
 
 -- spell check
