@@ -407,7 +407,7 @@ local wk = require("which-key")
 wk.register({
   f = {
     name = "file", -- optional group name
-    f = { "<cmd>Telescope file_browser theme=ivy<cr>", "Find File" }, -- create a binding with label
+    f = { "<cmd>execute 'Telescope file_browser theme=ivy path='.expand('%:p:h')<cr>", "Find File" }, -- create a binding with label
     -- b = { function() print("bar") end, "Foobar" } -- you can also pass functions!
   },
   b = {
