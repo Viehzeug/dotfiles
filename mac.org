@@ -127,6 +127,8 @@ apps=(
   alfred
   appcleaner
   battle-net
+  ballast
+  balenaetcher
   caffeine
   discord
   dropbox

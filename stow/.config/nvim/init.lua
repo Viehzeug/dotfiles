@@ -8,6 +8,9 @@
 -- terminal
 -- keybindings
 -- spelling correction
+if vim.g.vscode then
+	return
+end
 
 -- Install packer
 local install_path = vim.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nvim'
@@ -31,7 +34,7 @@ require('packer').startup(function()
   use 'wbthomason/packer.nvim' -- Package manager
   use 'equalsraf/neovim-gui-shim' -- GUI shim
   use 'tpope/vim-fugitive' -- Git commands in nvim
-  use 'tpope/vim-rhubarb' -- Fugitive-companion to interact with github
+  -- use 'tpope/vim-rhubarb' -- Fugitive-companion to interact with github
   use 'tpope/vim-commentary' -- "gc" to comment visual regions/lines
   use 'ludovicchabant/vim-gutentags' -- Automatic tags management
   -- UI to select things (files, grep results, open buffers...)
@@ -39,9 +42,6 @@ require('packer').startup(function()
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use { "nvim-telescope/telescope-file-browser.nvim" }
   use { "kyazdani42/nvim-web-devicons" }
-  --use { 'liuchengxu/vim-clap', run = ':Clap install-binary!' }
-
-  -- use 'joshdick/onedark.vim' -- Theme inspired by Atom
   use 'ishan9299/nvim-solarized-lua' -- Color Theme
   use 'itchyny/lightline.vim' -- Fancier statusline
   -- Add indentation guides even on blank lines
@@ -57,13 +57,7 @@ require('packer').startup(function()
   use 'hrsh7th/cmp-nvim-lsp'
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
-  --use { 'neoclide/coc.nvim', branch = 'release' }
-  use 'github/copilot.vim'
   use 'folke/which-key.nvim'
-  -- use {'kristijanhusak/orgmode.nvim', config = function()
-		-- require('orgmode').setup{}
-	-- end
-	-- }
 end)
 
 -- spell check
@@ -256,7 +250,7 @@ parser_config.org = {
 
 -- Parsers must be installed manually via :TSInstall
 require('nvim-treesitter.configs').setup {
-  ensure_installed = "maintained", -- make sure org is also (manually) installed
+  ensure_installed = "all", -- make sure org is also (manually) installed
   highlight = {
     enable = true, -- false will disable the whole extension
     disable = {'org'}, -- Remove this to use TS highlighter for some of the highlights (Experimental)
@@ -438,5 +432,3 @@ for i=1,10 do
 	vim.api.nvim_set_keymap('', string.format("<F%d>", i), '<NOP>', { noremap = true, silent = true })
 	vim.api.nvim_set_keymap('!', string.format("<F%d>", i), '<NOP>', { noremap = true, silent = true })
 end
-
-

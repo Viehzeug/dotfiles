@@ -22,9 +22,9 @@ fi
 
 ## editor
 ## if we have emacs, use emacs - else vi(m)
-if type emacs > /dev/null; then
-    export EDITOR='emacsclient -nw'
-    alias eg='emacsclient -n'
+if type nvim > /dev/null; then
+    export EDITOR='nvim'
+    alias eg='nvim'
 else
     export EDITOR='vi'
     alias eg='vi'
@@ -51,5 +51,19 @@ autoload -U compinit
 compinit -i
 
 # >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/usr/local/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
+        . "/usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+    else
+        export PATH="/usr/local/Caskroom/miniconda/base/bin:$PATH"
+    fi
+fi
+unset __conda_setup
 # <<< conda initialize <<<
 
+
+export PATH="$HOME/.rbenv/shims:$PATH"
