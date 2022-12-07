@@ -58,6 +58,7 @@ require('packer').startup(function()
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
   use 'folke/which-key.nvim'
+  use 'github/copilot.vim'
 end)
 
 -- spell check
@@ -104,6 +105,7 @@ vim.cmd('vnoremap <D-c> "+y')
 vim.cmd('vnoremap <D-x> "+x')
 vim.cmd('imap <D-a> <ESC>ggVG')
 vim.cmd('nmap <D-a> ggVG')
+-- GuiClipboard()
 
 
 --Set colorscheme (order is important here)
@@ -432,3 +434,7 @@ for i=1,10 do
 	vim.api.nvim_set_keymap('', string.format("<F%d>", i), '<NOP>', { noremap = true, silent = true })
 	vim.api.nvim_set_keymap('!', string.format("<F%d>", i), '<NOP>', { noremap = true, silent = true })
 end
+
+
+-- make copilot happy
+vim.g.copilot_node_command = "/Users/marc/.nvm/versions/node/v17.9.1/bin/node"
