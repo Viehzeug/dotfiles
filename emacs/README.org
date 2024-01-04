@@ -1,7 +1,0 @@
-* Emacs
-
-See [[init.org]].
-
-* Cheat Sheet
-
-See [[CheatSheet.org]] and [[CheatSheet.pdf]].
