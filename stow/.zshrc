@@ -1,6 +1,5 @@
 export ZSH=~/.zsh
 
-
 ## pager
 if type less > /dev/null; then
     export PAGER="less"
@@ -20,31 +19,11 @@ elif [[ $OSTYPE == linux-gnu ]]; then
     }
 fi
 
-## editor
-## if we have emacs, use emacs - else vi(m)
-if type nvim > /dev/null; then
-    export EDITOR='nvim'
-    alias eg='nvim'
-else
-    export EDITOR='vi'
-    alias eg='vi'
-fi
-
 export PATH="${HOME}/.local/bin:${PATH}"
-
-alias e=$EDITOR
-
-export GUROBI_HOME="/opt/gurobi811/linux64"
-export PATH="${PATH}:${GUROBI_HOME}/bin"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${GUROBI_HOME}/lib"
-
-
-
-
+export PATH="/opt/homebrew/bin:$PATH"
+. /opt/homebrew/etc/profile.d/z.sh
 
 for config_file ($ZSH/lib/*.zsh) source $config_file
-
-. ~/.z.sh
 
 # Load and run compinit
 autoload -U compinit
@@ -52,27 +31,17 @@ compinit -i
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/usr/local/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('/opt/homebrew/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
-        . "/usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+    if [ -f "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
+        . "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh"
     else
-        export PATH="/usr/local/Caskroom/miniconda/base/bin:$PATH"
+        export PATH="/opt/homebrew/Caskroom/miniconda/base/bin:$PATH"
     fi
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-
-
-export PATH="$HOME/.rbenv/shims:$PATH"
-export PATH="/usr/local/opt/openjdk/bin:$PATH"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-autoload -Uz compinit
-zstyle ':completion:*' menu select
-fpath+=~/.zfunc
+export MODULAR_HOME="/Users/marc/.modular"
+export PATH="/Users/marc/.modular/pkg/packages.modular.com_mojo/bin:$PATH"

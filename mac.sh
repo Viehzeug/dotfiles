@@ -76,13 +76,12 @@ cd -
 
 echo "Installing core apps..."
 apps=(
-  #ballast -- readjusts airpod volume, check if still needed
   #hammerspoon
   #pokemon-reborn
   #tor-browser
-  portfolioperformance
   alfred
   appcleaner
+  balance-lock
   balenaetcher
   battle-net
   bettertouchtool
@@ -108,11 +107,12 @@ apps=(
   microsoft-teams
   miniconda
   nordvpn
-  obisidian
+  obsidian
   omnidisksweeper
   owncloud
-  plex-media-player
+  plex
   plexamp
+  portfolioperformance
   protonmail-bridge
   signal
   skype
@@ -124,10 +124,11 @@ apps=(
   timemachineeditor
   virtualbox
   visual-studio-code
+  vivaldi
   vlc
   vmware-fusion
-  whatsapp
   warp
+  whatsapp
   xquartz
   zoom
   zotero

@@ -16,19 +16,3 @@ elif [[ $OSTYPE == linux-gnu ]]; then
         xdg-open "$*" >/dev/null 2>/dev/null & 
     }
 fi
-
-## editor
-## if we have emacs, use emacs - else vi(m)
-if type emacs > /dev/null; then
-    export EDITOR='emacsclient -nw'
-    alias eg='emacsclient -n'
-else
-    export EDITOR='vi'
-    alias eg='vi'
-fi
-
-alias e=$EDITOR
-
-export GUROBI_HOME="/opt/gurobi811/linux64"
-export PATH="${PATH}:${GUROBI_HOME}/bin"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${GUROBI_HOME}/lib"
