@@ -1,2 +1,10 @@
 theme = iTerm2 Solarized Light
 font-size=20
+
+# New workspaces/windows always start at home
+working-directory = ~
+window-inherit-working-directory = false
+
+# Tabs and splits inherit the CWD of the focused pane
+tab-inherit-working-directory = true
+split-inherit-working-directory = true
