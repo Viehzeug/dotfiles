@@ -9,9 +9,7 @@ export LANG=en_US.UTF-8
 export LC_CTYPE=$LANG
 
 
-if [[ $OSTYPE == darwin* ]]; then
-    source ~/.brew_github_key
-elif [[ $OSTYPE == linux-gnu ]]; then
+if [[ $OSTYPE == linux-gnu ]]; then
     function open () {
         xdg-open "$*" >/dev/null 2>/dev/null & 
     }
