@@ -1,4 +1,5 @@
-theme = iTerm2 Solarized Light
+# theme: swap between catppuccin-latte (light) and catppuccin-frappe (dark)
+theme = Catppuccin Latte
 font-size=20
 macos-option-as-alt = true
 
