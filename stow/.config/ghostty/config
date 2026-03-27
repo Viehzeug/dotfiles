@@ -1,5 +1,6 @@
 theme = iTerm2 Solarized Light
 font-size=20
+macos-option-as-alt = true
 
 # New workspaces/windows always start at home
 working-directory = ~
